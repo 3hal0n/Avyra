@@ -89,6 +89,28 @@
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<!--HuggingFace Java API wrapper -->
+<!--		<dependency>-->
+<!--			<groupId>io.github.yoazmenda</groupId>-->
+<!--			<artifactId>huggingface-inference</artifactId>-->
+<!--			<version>1.0.0</version>-->
+<!--		</dependency>-->
+		<!-- JSON parsing -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
+
+		<!-- Spring Boot Starter -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
