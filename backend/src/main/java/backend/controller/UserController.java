@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/auth")
 public class UserController {
@@ -30,7 +32,7 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@Valid @RequestBody UserLoginDTO request) {
         String jwtToken = userService.loginUser(request); // Returns JWT on valid login
-        return ResponseEntity.ok(jwtToken);
+        return ResponseEntity.ok(Map.of("token", jwtToken)); //safer now
     }
 
     // Profile Endpoint (Protected, returns user info)
@@ -39,5 +41,16 @@ public class UserController {
         User user = userService.getAuthenticatedUser(); // Requires JWT filter to extract principal
         return ResponseEntity.ok(user);
     }
+
+    @ControllerAdvice
+    public class GlobalExceptionHandler {
+
+        @ExceptionHandler(Exception.class)
+        public ResponseEntity<?> handleError(Exception ex) {
+            ex.printStackTrace(); // Logs to console
+            return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
+        }
+    }
+
 }
 

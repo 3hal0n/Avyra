@@ -43,6 +43,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String loginUser(UserLoginDTO request) {
+        System.out.println("Login request: " + request.getEmailOrUsername() + ", " + request.getPassword()); // <== Debug
         Optional<User> optionalUser = userRepository.findByEmail(request.getEmailOrUsername());
         if (optionalUser.isEmpty()) {
             optionalUser = userRepository.findByUsername(request.getEmailOrUsername());
