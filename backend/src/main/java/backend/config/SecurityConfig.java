@@ -89,7 +89,7 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/api/games/**").permitAll() // public endpoints
+                        .requestMatchers("/api/auth/**", "/api/games/**", "/api/cart/**").permitAll() // public endpoints
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class); // ✅ Filter here
