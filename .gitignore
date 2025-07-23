@@ -4,3 +4,6 @@
 # Node modules and build files
 frontend/node_modules/
 frontend/dist/
+
+# Ignore sensitive config file
+backend/src/main/resources/application.properties
