@@ -9,7 +9,7 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class HuggingfaceLLMService {
 
-    @Value("${huggingface.api.key}")
+    @Value("${HUGGINGFACE_API_KEY}")
     private String apiKey;
 
     @Value("${huggingface.model.llm}")

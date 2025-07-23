@@ -16,7 +16,7 @@ public class ChatbotServiceImpl implements ChatbotService {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public ChatbotServiceImpl(@Value("${huggingface.api.key}") String apiKey) {
+    public ChatbotServiceImpl(@Value("${HUGGINGFACE_API_KEY}") String apiKey) {
         this.apiKey = apiKey;
         this.restTemplate = new RestTemplate();
         this.restTemplate.setUriTemplateHandler(new DefaultUriBuilderFactory("https://api-inference.huggingface.co"));
