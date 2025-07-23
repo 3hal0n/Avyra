@@ -21,8 +21,14 @@ public class GameController {
 
     // GET /api/games — List all games, publicly accessible
     @GetMapping
-    public ResponseEntity<List<GameDTO>> getAllGames() {
-        List<GameDTO> games = gameService.getAllGames();
+    public ResponseEntity<List<GameDTO>> getAllGames(
+        @RequestParam(required = false) String search,
+        @RequestParam(required = false) String genre,
+        @RequestParam(required = false) String platform,
+        @RequestParam(required = false) Double minPrice,
+        @RequestParam(required = false) Double maxPrice
+    ) {
+        List<GameDTO> games = gameService.getFilteredGames(search, genre, platform, minPrice, maxPrice);
         return ResponseEntity.ok(games);
     }
 

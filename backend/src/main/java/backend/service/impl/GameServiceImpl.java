@@ -35,6 +35,19 @@ public class GameServiceImpl implements GameService {
         return toGameDTO(game);
     }
 
+    @Override
+    public List<GameDTO> getFilteredGames(String search, String genre, String platform, Double minPrice, Double maxPrice) {
+        List<Game> games = gameRepository.findAll();
+        return games.stream()
+            .filter(game -> search == null || game.getTitle().toLowerCase().contains(search.toLowerCase()))
+            .filter(game -> genre == null || game.getGenres().toLowerCase().contains(genre.toLowerCase()))
+            .filter(game -> platform == null || game.getPlatforms().toLowerCase().contains(platform.toLowerCase()))
+            .filter(game -> minPrice == null || game.getPrice() >= minPrice)
+            .filter(game -> maxPrice == null || game.getPrice() <= maxPrice)
+            .map(this::toGameDTO)
+            .collect(Collectors.toList());
+    }
+
     private GameDTO toGameDTO(Game game) {
         return new GameDTO(
                 game.getId(),

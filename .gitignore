@@ -1,0 +1,6 @@
+# Ignore backend application properties
+/backend/src/main/resources/application.properties
+
+# Node modules and build files
+frontend/node_modules/
+frontend/dist/

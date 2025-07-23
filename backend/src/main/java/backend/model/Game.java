@@ -21,6 +21,7 @@ public class Game {
 
     private String platforms;      // comma-separated platforms
 
+    @Column(name = "cover_url")
     private String coverUrl;
 
     @Column(name = "sysreq_min", columnDefinition = "TEXT")
