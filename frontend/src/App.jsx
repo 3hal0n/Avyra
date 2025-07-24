@@ -1,11 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-
-// Pages
+//Pages
 import Home from "./pages/Home";
 import GameDetails from "./pages/GameDetails";
-
-// Optional: Add more pages as you build them
-// import Cart from "./pages/Cart";
+import Cart from "./pages/Cart";
 // import Wishlist from "./pages/Wishlist";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -19,8 +16,9 @@ function App() {
         <Route path="/game/:id" element={<GameDetails />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/cart" element={<Cart />} />
         {/* Optional future pages */}
-        {/* <Route path="/cart" element={<Cart />} />
+        {/* 
         <Route path="/wishlist" element={<Wishlist />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
