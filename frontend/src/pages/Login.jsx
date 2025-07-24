@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import NavBar from "../components/Navbar";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -45,6 +46,7 @@ const Login = () => {
 
   return (
     <div className="max-w-md mx-auto p-6 bg-gray-800 rounded-md shadow-md text-white mt-10">
+      <NavBar />
       <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
       {error && (
         <div className="bg-red-600 p-2 mb-4 rounded text-center">{error}</div>
