@@ -9,6 +9,11 @@ const Cart = () => {
   const [error, setError] = useState(null);
   const [updating, setUpdating] = useState(false);
 
+  // Checkout-specific state
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [checkoutSuccess, setCheckoutSuccess] = useState(null);
+  const [checkoutError, setCheckoutError] = useState(null);
+
   // Utility: Set Authorization header on axios from localStorage
   const setAuthHeader = () => {
     const token = localStorage.getItem("jwtToken");
@@ -19,7 +24,6 @@ const Cart = () => {
     return false;
   };
 
-  // Fetch cart items
   const fetchCartItems = async () => {
     if (!setAuthHeader()) {
       setError("You must be logged in to view your cart.");
@@ -32,9 +36,7 @@ const Cart = () => {
       setCartItems(response.data);
     } catch (err) {
       console.error(err);
-      setError(
-        err.response?.data?.error || "Failed to load cart. Please try again."
-      );
+      setError(err.response?.data?.error || "Failed to load cart.");
     } finally {
       setLoading(false);
     }
@@ -44,51 +46,33 @@ const Cart = () => {
     fetchCartItems();
   }, []);
 
-  // Update quantity of an item in cart (PUT is missing in backend; we do it with POST with quantity param)
-  // We'll call the addToCart API with the new quantity delta (newQty - currentQty)
   const handleQuantityChange = async (gameId, newQuantity) => {
-    if (newQuantity < 1) return; // minimum quantity 1 
+    if (newQuantity < 1) return;
     if (!setAuthHeader()) {
       setError("You must be logged in to update your cart.");
       return;
     }
+
     try {
       setUpdating(true);
-      // Find old quantity
       const oldItem = cartItems.find(item => item.gameId === gameId);
       if (!oldItem) return;
       const delta = newQuantity - oldItem.quantity;
-      if (delta === 0) return; // no change
+      if (delta === 0) return;
 
-      // POST for addToCart with quantity=delta (positive or negative not supported by backend)
-      // Backend only supports adding positive quantity.
-      // So to update quantity, we do:
-      // - Remove item from cart
-      // - Add item with new quantity
-      // Because backend doesn't have direct update quantity, do remove + add
-
-      // Remove existing
+      // Remove + re-add (instead of PATCH)
       await axios.delete(`http://localhost:8080/api/cart/${gameId}`);
-      // Add with new quantity
-      await axios.post(
-        `http://localhost:8080/api/cart/${gameId}`,
-        null,
-        { params: { quantity: newQuantity } }
-      );
-      
-      // Refresh cart items after update
+      await axios.post(`http://localhost:8080/api/cart/${gameId}?quantity=${newQuantity}`);
+
       await fetchCartItems();
     } catch (err) {
       console.error(err);
-      setError(
-        err.response?.data?.error || "Failed to update cart. Please try again."
-      );
+      setError(err.response?.data?.error || "Failed to update cart.");
     } finally {
       setUpdating(false);
     }
   };
 
-  // Remove item from cart
   const handleRemoveItem = async (gameId) => {
     if (!setAuthHeader()) {
       setError("You must be logged in to update your cart.");
@@ -97,20 +81,43 @@ const Cart = () => {
     try {
       setUpdating(true);
       await axios.delete(`http://localhost:8080/api/cart/${gameId}`);
-
-      // Refresh cart items after removal
       await fetchCartItems();
     } catch (err) {
       console.error(err);
-      setError(
-        err.response?.data?.error || "Failed to remove item. Please try again."
-      );
+      setError(err.response?.data?.error || "Failed to remove item.");
     } finally {
       setUpdating(false);
     }
   };
 
-  // Calculate total cart value
+  const handleCheckout = async () => {
+    if (!setAuthHeader()) {
+      navigate("/login");
+      return;
+    }
+
+    setCheckoutLoading(true);
+    setCheckoutError(null);
+    setCheckoutSuccess(null);
+
+    try {
+      const response = await axios.post("http://localhost:8080/api/orders/checkout");
+
+      const { orderId, message, createdAt } = response.data;
+      setCheckoutSuccess({ orderId, message, createdAt });
+
+      // Clear visually
+      setCartItems([]);
+    } catch (err) {
+      const msg =
+        err.response?.data?.error || "Checkout failed. Try again.";
+      setCheckoutError(msg);
+    } finally {
+      setCheckoutLoading(false);
+    }
+  };
+
+  // Calculate total price
   const totalPrice = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
@@ -145,7 +152,7 @@ const Cart = () => {
     );
   }
 
-  if (cartItems.length === 0) {
+  if (cartItems.length === 0 && !checkoutSuccess) {
     return (
       <div className="text-center text-white p-10">
         Your cart is empty.
@@ -157,66 +164,93 @@ const Cart = () => {
     <div className="max-w-5xl mx-auto p-6 text-white">
       <h1 className="text-3xl font-bold mb-6">Your Shopping Cart</h1>
 
-      <table className="w-full border-collapse border border-gray-700">
-        <thead>
-          <tr className="border-b border-gray-700">
-            <th className="text-left p-3">Title</th>
-            <th className="text-right p-3">Price</th>
-            <th className="text-center p-3">Quantity</th>
-            <th className="text-right p-3">Total</th>
-            <th className="p-3">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {cartItems.map(({ gameId, title, price, quantity }) => (
-            <tr key={gameId} className="border-b border-gray-700">
-              <td className="p-3">{title}</td>
-              <td className="p-3 text-right">${price.toFixed(2)}</td>
-              <td className="p-3 text-center">
-                {/* Quantity input */}
-                <input
-                  type="number"
-                  min={1}
-                  value={quantity}
-                  disabled={updating}
-                  onChange={(e) =>
-                    handleQuantityChange(gameId, parseInt(e.target.value, 10))
-                  }
-                  className="w-16 text-center rounded border border-gray-600 bg-gray-900 text-white"
-                />
-              </td>
-              <td className="p-3 text-right">${(price * quantity).toFixed(2)}</td>
-              <td className="p-3 text-center">
-                <button
-                  disabled={updating}
-                  onClick={() => handleRemoveItem(gameId)}
-                  className="px-3 py-1 rounded bg-red-600 hover:bg-red-700"
-                >
-                  Remove
-                </button>
-              </td>
-            </tr>
-          ))}
-          <tr>
-            <td colSpan={3} className="text-right font-bold p-3">
-              Total:
-            </td>
-            <td className="text-right font-bold p-3">${totalPrice.toFixed(2)}</td>
-            <td></td>
-          </tr>
-        </tbody>
-      </table>
+      {cartItems.length > 0 && (
+        <>
+          <table className="w-full border-collapse border border-gray-700">
+            <thead>
+              <tr className="border-b border-gray-700">
+                <th className="text-left p-3">Title</th>
+                <th className="text-right p-3">Price</th>
+                <th className="text-center p-3">Quantity</th>
+                <th className="text-right p-3">Total</th>
+                <th className="p-3">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {cartItems.map(({ gameId, title, price, quantity }) => (
+                <tr key={gameId} className="border-b border-gray-700">
+                  <td className="p-3">{title}</td>
+                  <td className="p-3 text-right">${price.toFixed(2)}</td>
+                  <td className="p-3 text-center">
+                    <input
+                      type="number"
+                      min={1}
+                      value={quantity}
+                      disabled={updating}
+                      onChange={(e) =>
+                        handleQuantityChange(gameId, parseInt(e.target.value, 10))
+                      }
+                      className="w-16 text-center rounded border border-gray-600 bg-gray-900 text-white"
+                    />
+                  </td>
+                  <td className="p-3 text-right">${(price * quantity).toFixed(2)}</td>
+                  <td className="p-3 text-center">
+                    <button
+                      disabled={updating}
+                      onClick={() => handleRemoveItem(gameId)}
+                      className="px-3 py-1 rounded bg-red-600 hover:bg-red-700"
+                    >
+                      Remove
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              <tr>
+                <td colSpan={3} className="text-right font-bold p-3">
+                  Total:
+                </td>
+                <td className="text-right font-bold p-3">
+                  ${totalPrice.toFixed(2)}
+                </td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
 
-      {/* Optional: Checkout button or other UI */}
-      <div className="mt-6 flex justify-end">
-        <button
-          disabled={cartItems.length === 0 || updating}
-          className="bg-green-600 hover:bg-green-700 px-5 py-2 rounded font-bold"
-          onClick={() => alert("Implement checkout flow!")}
-        >
-          Checkout
-        </button>
-      </div>
+          {/* Checkout Section */}
+          <div className="mt-6 flex justify-end">
+            <button
+              disabled={cartItems.length === 0 || updating || checkoutLoading}
+              className="bg-green-600 hover:bg-green-700 px-5 py-2 rounded font-bold"
+              onClick={handleCheckout}
+            >
+              {checkoutLoading ? "Processing..." : "🛒 Checkout"}
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* Checkout Error */}
+      {checkoutError && (
+        <div className="mt-4 text-red-500 font-semibold">{checkoutError}</div>
+      )}
+
+      {/* Checkout Success Summary */}
+      {checkoutSuccess && (
+        <div className="mt-6 bg-green-900 text-green-100 p-4 rounded shadow-lg">
+          <h2 className="text-xl font-bold mb-2">✅ Order Placed Successfully</h2>
+          <p>🆔 <strong>Order ID:</strong> {checkoutSuccess.orderId}</p>
+          <p>🛍 <strong>Message:</strong> {checkoutSuccess.message}</p>
+          <p>📅 <strong>Date:</strong> {new Date(checkoutSuccess.createdAt).toLocaleString()}</p>
+
+          <button
+            onClick={() => navigate("/orders")}
+            className="mt-4 bg-pink-600 hover:bg-pink-700 px-4 py-2 rounded font-semibold text-white"
+          >
+            View My Orders
+          </button>
+        </div>
+      )}
     </div>
   );
 };

@@ -46,13 +46,12 @@ public class ChatbotServiceImpl implements ChatbotService {
     @Override
     public String getRecommendation(String prompt) {
         String systemPrompt = "You are a gaming expert. Recommend games based on this user query: " + prompt;
-        return queryAI(systemPrompt, "meta-llama/Llama-3.3-70B-Instruct");
-        // You can use another suitable conversational model from HuggingFace Hub
+        return queryAI(systemPrompt, "google/flan-t5-base");
     }
 
     @Override
     public String getSystemRequirements(String prompt) {
         String systemPrompt = "Given this PC setup, recommend the best games from modern AAA to indie and explain reasoning for each: " + prompt;
-        return queryAI(systemPrompt, "meta-llama/Llama-3.3-70B-Instruct");
+        return queryAI(systemPrompt, "google/flan-t5-base");
     }
 }

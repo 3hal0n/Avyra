@@ -40,7 +40,7 @@ import Wishlist from "./pages/Wishlist";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
-
+import Chatbot from "./pages/Chatbot";
 // import NotFound from "./pages/NotFound";
 
 function App() {
@@ -53,6 +53,7 @@ function App() {
       <Route path="/cart" element={<Cart />} />
       <Route path="/wishlist" element={<Wishlist />} />
       <Route path="/profile" element={<Profile />} />
+      <Route path="/chatbot" element={<Chatbot />} />
       {/* Optional future pages */}
       {/* <Route path="*" element={<NotFound />} /> */}
     </Routes>
