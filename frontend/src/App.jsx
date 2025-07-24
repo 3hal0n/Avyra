@@ -42,7 +42,7 @@ import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import Chatbot from "./pages/Chatbot";
 import Orders from "./pages/Orders";
-
+import OrderDetails from "./pages/OrderDetails";
 
 function App() {
   return (
@@ -56,6 +56,7 @@ function App() {
       <Route path="/profile" element={<Profile />} />
       <Route path="/chatbot" element={<Chatbot />} />
       <Route path="/orders" element={<Orders />} />
+      <Route path="/orders/:id" element={<OrderDetails />} />
       {/* Optional future pages */}
       {/* <Route path="*" element={<NotFound />} /> */}
     </Routes>

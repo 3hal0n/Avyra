@@ -16,13 +16,18 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
-//    @PostMapping("/checkout")
-//    public ResponseEntity<CheckoutResponseDTO> checkout() {
-//        return ResponseEntity.ok(orderService.checkout());
-//    }
+    @PostMapping("/checkout")
+    public ResponseEntity<CheckoutResponseDTO> checkout() {
+        return ResponseEntity.ok(orderService.checkout());
+    }
+
     @GetMapping
     public ResponseEntity<List<Order>> getUserOrders() {
         return ResponseEntity.ok(orderService.getOrdersForAuthenticatedUser());
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Order> getOrderById(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.getOrderByIdForAuthenticatedUser(id));
+    }
 }

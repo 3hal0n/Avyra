@@ -35,12 +35,23 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.findByUser(user);
     }
 
+    @Override
+    public Order getOrderByIdForAuthenticatedUser(Long id) {
+        User user = userService.getAuthenticatedUser();
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        if (!order.getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("You are not authorized to view this order.");
+        }
+
+        return order;
+    }
 
     @Override
-    @Transactional // IMPORTANT!
+    @Transactional
     public CheckoutResponseDTO checkout() {
         User user = userService.getAuthenticatedUser();
-
         List<CartItem> cartItems = cartItemRepository.findByUser(user);
 
         if (cartItems.isEmpty()) {
