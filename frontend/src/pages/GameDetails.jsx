@@ -6,10 +6,22 @@ import axios from "axios";
 import { useWishlist } from "../context/WishlistContext";
 
 const StarRating = ({ value = 5 }) => (
-  <span className="text-yellow-400 text-lg">{'★'.repeat(value).padEnd(5, '☆')}</span>
+  <span className="text-yellow-400 text-lg" aria-label={`${value} star rating`}>
+    {"★".repeat(value).padEnd(5, "☆")}
+  </span>
 );
 
 const isLoggedIn = () => !!localStorage.getItem("jwtToken");
+
+// Helper to format date nicely
+const formatDate = (isoString) => {
+  const date = new Date(isoString);
+  return date.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
 
 const GameDetails = () => {
   const { id } = useParams();
@@ -17,20 +29,29 @@ const GameDetails = () => {
   const [game, setGame] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const { 
-    wishlist, loading: wishlistLoading, feedback: wishlistFeedback,
-    addToWishlist, removeFromWishlist, isInWishlist 
+  const {
+    wishlist,
+    loading: wishlistLoading,
+    feedback: wishlistFeedback,
+    addToWishlist,
+    removeFromWishlist,
+    isInWishlist,
   } = useWishlist();
 
-  const [reviews, setReviews] = useState([
-    { username: "Alex", comment: "Amazing game!", stars: 5, avatar: "" },
-    { username: "Chris", comment: "Engaging story and visuals.", stars: 4, avatar: "" }
-  ]);
-  const [reviewText, setReviewText] = useState("");
+  const [reviews, setReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
+
+  // New review inputs
+  const [newRating, setNewRating] = useState(5);
+  const [newComment, setNewComment] = useState("");
   const [reviewError, setReviewError] = useState(null);
+  const [reviewSuccess, setReviewSuccess] = useState(null);
+  const [addingReview, setAddingReview] = useState(false);
+
   const [feedback, setFeedback] = useState({ cart: null, review: null });
   const [addingCart, setAddingCart] = useState(false);
 
+  // Fetch game data
   useEffect(() => {
     const fetchGame = async () => {
       try {
@@ -45,18 +66,41 @@ const GameDetails = () => {
     fetchGame();
   }, [id]);
 
+  // Fetch reviews for this game
+  const fetchReviews = async () => {
+    setReviewsLoading(true);
+    try {
+      const response = await axios.get("http://localhost:8080/api/reviews", {
+        params: { gameId: id },
+      });
+      setReviews(response.data);
+    } catch (err) {
+      console.error("Failed to fetch reviews:", err);
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (game) {
+      fetchReviews();
+    }
+  }, [game]);
+
   // Cart add handler
   const handleAddCart = async () => {
     if (!isLoggedIn()) return navigate("/login");
     setAddingCart(true);
     try {
-      axios.defaults.headers.common["Authorization"] = `Bearer ${localStorage.getItem("jwtToken")}`;
+      axios.defaults.headers.common[
+        "Authorization"
+      ] = `Bearer ${localStorage.getItem("jwtToken")}`;
       await axios.post(`http://localhost:8080/api/cart/${game.id}?quantity=1`);
-      setFeedback(f => ({ ...f, cart: "Added to cart!" }));
+      setFeedback((f) => ({ ...f, cart: "Added to cart!" }));
     } catch (err) {
-      setFeedback(f => ({ ...f, cart: "Failed to add to cart." }));
+      setFeedback((f) => ({ ...f, cart: "Failed to add to cart." }));
     }
-    setTimeout(() => setFeedback(f => ({ ...f, cart: null })), 2000);
+    setTimeout(() => setFeedback((f) => ({ ...f, cart: null })), 2000);
     setAddingCart(false);
   };
 
@@ -70,34 +114,97 @@ const GameDetails = () => {
     }
   };
 
-  // Review submit handler
-  const handleReviewSubmit = (e) => {
+  // Submit new review
+  const handleReviewSubmit = async (e) => {
     e.preventDefault();
     if (!isLoggedIn()) {
-      setReviewError("Login to submit a review.");
+      setReviewError("You must be logged in to submit a review.");
       return;
     }
-    if (!reviewText.trim()) {
-      setReviewError("Enter your review.");
+    if (!newComment.trim()) {
+      setReviewError("Please enter a comment.");
       return;
     }
-    setReviews([
-      { username: "You", comment: reviewText, stars: 5, avatar: "" },
-      ...reviews
-    ]);
-    setReviewText("");
+    if (newRating < 1 || newRating > 5) {
+      setReviewError("Rating must be between 1 and 5.");
+      return;
+    }
+
+    setAddingReview(true);
     setReviewError(null);
-    setFeedback(f => ({ ...f, review: "Thank you for reviewing!" }));
-    setTimeout(() => setFeedback(f => ({ ...f, review: null })), 2000);
+
+    try {
+      axios.defaults.headers.common[
+        "Authorization"
+      ] = `Bearer ${localStorage.getItem("jwtToken")}`;
+      await axios.post("http://localhost:8080/api/reviews", {
+        gameId: parseInt(id, 10),
+        rating: newRating,
+        comment: newComment.trim(),
+      });
+      setReviewSuccess("Review added successfully!");
+      setNewComment("");
+      setNewRating(5);
+      // Refresh review list
+      await fetchReviews();
+    } catch (err) {
+      let msg = "Failed to add review.";
+      if (
+        err.response &&
+        err.response.data &&
+        err.response.data.error
+      ) {
+        msg = err.response.data.error;
+      }
+      setReviewError(msg);
+    }
+    setAddingReview(false);
+    setTimeout(() => {
+      setReviewError(null);
+      setReviewSuccess(null);
+    }, 4000);
+  };
+
+  // Delete review (only if current user owns it)
+  const handleReviewDelete = async (reviewId) => {
+    if (!isLoggedIn()) return navigate("/login");
+    try {
+      axios.defaults.headers.common[
+        "Authorization"
+      ] = `Bearer ${localStorage.getItem("jwtToken")}`;
+      await axios.delete(`http://localhost:8080/api/reviews/${reviewId}`);
+      // Refresh review list
+      await fetchReviews();
+    } catch (err) {
+      alert("Failed to delete review.");
+    }
   };
 
   if (loading)
-    return <div className="flex items-center justify-center min-h-screen bg-black text-white text-2xl">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-black text-white text-2xl">
+        Loading...
+      </div>
+    );
 
   if (!game || Object.keys(game).length === 0)
-    return <div className="flex items-center justify-center min-h-screen bg-black text-red-500 text-2xl">Game not found.</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-black text-red-500 text-2xl">
+        Game not found.
+      </div>
+    );
 
   const wishlistActive = isInWishlist(game.id);
+  const currentUsername = (() => {
+    try {
+      const tokenPayload = JSON.parse(
+        atob(localStorage.getItem("jwtToken")?.split(".")[1])
+      );
+      return tokenPayload?.sub || null;
+    } catch {
+      return null;
+    }
+  })();
 
   return (
     <div className="relative min-h-screen w-full bg-gradient-to-br from-[#11002a] to-[#424242]">
@@ -141,7 +248,9 @@ const GameDetails = () => {
         <aside className="flex-1 max-w-xl glassmorphism rounded-2xl shadow-xl p-8 flex flex-col justify-between bg-white/10 backdrop-blur-lg border border-white/20">
           <div>
             <div className="flex flex-col gap-2">
-              <h1 className="text-4xl tracking-tight font-bold text-white drop-shadow">{game.title}</h1>
+              <h1 className="text-4xl tracking-tight font-bold text-white drop-shadow">
+                {game.title}
+              </h1>
               <div className="flex flex-wrap items-center gap-3 text-lg text-gray-300 mt-2 mb-0.5 select-none">
                 <span className="px-3 py-0.5 bg-indigo-900/60 rounded-lg">{game.genres}</span>
                 <span className="px-3 py-0.5 bg-violet-900/60 rounded-lg">{game.platforms}</span>
@@ -152,30 +261,32 @@ const GameDetails = () => {
               <span className="text-3xl text-green-400 font-bold drop-shadow">${game.price}</span>
               <button
                 onClick={handleAddCart}
-                className={`px-5 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold text-white transition-all shadow ${addingCart ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
+                className={`px-5 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold text-white transition-all shadow ${
+                  addingCart ? "opacity-50 cursor-not-allowed" : ""
+                }`}
                 disabled={addingCart}
               >
                 {feedback.cart ? feedback.cart : addingCart ? "Adding..." : "Add to Cart"}
               </button>
               <button
                 onClick={handleWishlistToggle}
-                className={`px-5 py-2 rounded-lg font-semibold text-white transition-all shadow ${wishlistActive ? 'bg-pink-500 hover:bg-pink-600' : 'bg-pink-600 hover:bg-pink-700'
-                  }`}
+                className={`px-5 py-2 rounded-lg font-semibold text-white transition-all shadow ${
+                  wishlistActive ? "bg-pink-500 hover:bg-pink-600" : "bg-pink-600 hover:bg-pink-700"
+                }`}
               >
                 {wishlistLoading
                   ? "Loading..."
                   : wishlistFeedback
-                    ? wishlistFeedback
-                    : wishlistActive
-                      ? "Remove from Wishlist"
-                      : "Add to Wishlist"}
+                  ? wishlistFeedback
+                  : wishlistActive
+                  ? "Remove from Wishlist"
+                  : "Add to Wishlist"}
               </button>
             </div>
             {(game.sysreqMin || game.sysreqRec) && (
               <div className="mt-2 p-4 bg-white/10 rounded-xl text-sm text-gray-200 shadow-inner space-y-1 border border-white/10">
-                {game.sysreqMin && (<div><span className="font-medium">Min:</span> {game.sysreqMin}</div>)}
-                {game.sysreqRec && (<div><span className="font-medium">Recommended:</span> {game.sysreqRec}</div>)}
+                {game.sysreqMin && <div><span className="font-medium">Min:</span> {game.sysreqMin}</div>}
+                {game.sysreqRec && <div><span className="font-medium">Recommended:</span> {game.sysreqRec}</div>}
               </div>
             )}
           </div>
@@ -187,16 +298,33 @@ const GameDetails = () => {
         <div className="bg-white/10 backdrop-blur-lg border border-white/10 rounded-2xl p-8 shadow-xl">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-7">
             <h2 className="text-2xl font-bold text-white mb-4 md:mb-0">Player Reviews</h2>
-            {isLoggedIn() && (
+            {isLoggedIn() ? (
               <form
                 onSubmit={handleReviewSubmit}
                 className="flex flex-col md:flex-row items-end gap-3"
                 autoComplete="off"
               >
+                {/* Star Rating Selector */}
+                <div className="flex items-center gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      aria-label={`Rate ${star} star${star > 1 ? "s" : ""}`}
+                      onClick={() => setNewRating(star)}
+                      className={`text-3xl cursor-pointer ${
+                        newRating >= star ? "text-yellow-400" : "text-gray-600"
+                      } focus:outline-none`}
+                    >
+                      ★
+                    </button>
+                  ))}
+                </div>
+                {/* Review Textarea */}
                 <textarea
                   className="resize-none rounded bg-gray-800 border border-white/30 text-white px-3 py-1 min-w-[200px] min-h-[36px]"
-                  value={reviewText}
-                  onChange={e => setReviewText(e.target.value)}
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
                   placeholder="Write your review..."
                   maxLength={300}
                   required
@@ -205,40 +333,68 @@ const GameDetails = () => {
                 <button
                   type="submit"
                   className="bg-green-600 hover:bg-green-700 px-4 py-1.5 rounded-lg font-bold text-white"
+                  disabled={addingReview}
                 >
-                  Post Review
+                  {addingReview ? "Posting..." : "Post Review"}
                 </button>
               </form>
+            ) : (
+              <div className="mb-3 text-gray-400">
+                <button
+                  className="underline text-blue-400"
+                  onClick={() => navigate("/login")}
+                >
+                  Login
+                </button>{" "}
+                to add a review.
+              </div>
             )}
           </div>
           {reviewError && <div className="text-red-400 mb-3">{reviewError}</div>}
-          {feedback.review && <div className="text-green-400 mb-3">{feedback.review}</div>}
-          <div className="space-y-4">
-            {reviews.length === 0 && (
-              <div className="text-gray-300 text-center py-6">No reviews yet. Be the first!</div>
-            )}
-            {reviews.map((r, i) => (
-              <div key={i} className="flex items-center gap-4 p-4 bg-black/40 rounded-xl border border-white/5">
-                <div className="shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-purple-800 to-indigo-900 flex items-center justify-center text-white font-bold text-lg select-none">
-                  {r.avatar ? <img src={r.avatar} alt={r.username} className="rounded-full w-full h-full object-cover" /> : r.username.slice(0, 2).toUpperCase()}
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-white">{r.username}</span>
-                    <StarRating value={r.stars} />
-                  </div>
-                  <div className="text-gray-200">{r.comment}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-          {!isLoggedIn() && (
-            <div className="mt-4 text-gray-400 text-center">
-              <button className="underline text-blue-400" onClick={() => navigate("/login")}>
-                Login
-              </button>
-              to post a review.
+          {reviewSuccess && <div className="text-green-400 mb-3">{reviewSuccess}</div>}
+
+          {/* Reviews List */}
+          {reviewsLoading ? (
+            <div className="text-white text-center py-4">Loading reviews...</div>
+          ) : reviews.length === 0 ? (
+            <div className="text-gray-300 text-center py-6">
+              No reviews yet. Be the first!
             </div>
+          ) : (
+            <ul className="space-y-4 divide-y divide-white/10">
+              {reviews.map((r) => (
+                <li
+                  key={r.id}
+                  className="flex items-start gap-4 py-4"
+                  aria-label={`Review by ${r.username} with rating ${r.rating}`}
+                >
+                  <div className="shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-purple-800 to-indigo-900 flex items-center justify-center text-white font-bold text-lg select-none">
+                    {r.username.slice(0, 2).toUpperCase()}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="font-semibold text-white">{r.username}</span>
+                      <StarRating value={r.rating} />
+                    </div>
+                    <p className="text-gray-200">{r.comment}</p>
+                    <div className="text-xs text-gray-400 mt-1">
+                      {formatDate(r.createdAt)}
+                    </div>
+                  </div>
+                  {/* Delete button (only for user's own reviews) */}
+                  {r.username === currentUsername && (
+                    <button
+                      onClick={() => handleReviewDelete(r.id)}
+                      title="Delete review"
+                      className="ml-4 text-red-500 hover:text-red-600"
+                      aria-label="Delete your review"
+                    >
+                      &#x2715;
+                    </button>
+                  )}
+                </li>
+              ))}
+            </ul>
           )}
         </div>
       </section>
