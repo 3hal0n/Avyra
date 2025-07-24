@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import axios from "axios";
+import { useWishlist } from "../context/WishlistContext";
 
-// Helper: Star rating renderer
 const StarRating = ({ value = 5 }) => (
   <span className="text-yellow-400 text-lg">{'★'.repeat(value).padEnd(5, '☆')}</span>
 );
@@ -17,17 +17,21 @@ const GameDetails = () => {
   const [game, setGame] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Demo/trial data
+  const { 
+    wishlist, loading: wishlistLoading, feedback: wishlistFeedback,
+    addToWishlist, removeFromWishlist, isInWishlist 
+  } = useWishlist();
+
   const [reviews, setReviews] = useState([
     { username: "Alex", comment: "Amazing game!", stars: 5, avatar: "" },
     { username: "Chris", comment: "Engaging story and visuals.", stars: 4, avatar: "" }
   ]);
   const [reviewText, setReviewText] = useState("");
   const [reviewError, setReviewError] = useState(null);
-  const [feedback, setFeedback] = useState({ cart: null, wishlist: null, review: null });
+  const [feedback, setFeedback] = useState({ cart: null, review: null });
+  const [addingCart, setAddingCart] = useState(false);
 
   useEffect(() => {
-    // Fetch game details
     const fetchGame = async () => {
       try {
         const response = await axios.get(`http://localhost:8080/api/games/${id}`);
@@ -41,9 +45,10 @@ const GameDetails = () => {
     fetchGame();
   }, [id]);
 
-  // --- Handlers ---
+  // Cart add handler
   const handleAddCart = async () => {
     if (!isLoggedIn()) return navigate("/login");
+    setAddingCart(true);
     try {
       axios.defaults.headers.common["Authorization"] = `Bearer ${localStorage.getItem("jwtToken")}`;
       await axios.post(`http://localhost:8080/api/cart/${game.id}?quantity=1`);
@@ -52,15 +57,20 @@ const GameDetails = () => {
       setFeedback(f => ({ ...f, cart: "Failed to add to cart." }));
     }
     setTimeout(() => setFeedback(f => ({ ...f, cart: null })), 2000);
+    setAddingCart(false);
   };
 
-  const handleAddWishlist = async () => {
+  // Wishlist toggle handler
+  const handleWishlistToggle = async () => {
     if (!isLoggedIn()) return navigate("/login");
-    // TODO: Integrate real API
-    setFeedback(f => ({ ...f, wishlist: "Added to wishlist!" }));
-    setTimeout(() => setFeedback(f => ({ ...f, wishlist: null })), 2000);
+    if (isInWishlist(game.id)) {
+      await removeFromWishlist(game.id);
+    } else {
+      await addToWishlist(game.id);
+    }
   };
 
+  // Review submit handler
   const handleReviewSubmit = (e) => {
     e.preventDefault();
     if (!isLoggedIn()) {
@@ -86,6 +96,8 @@ const GameDetails = () => {
 
   if (!game || Object.keys(game).length === 0)
     return <div className="flex items-center justify-center min-h-screen bg-black text-red-500 text-2xl">Game not found.</div>;
+
+  const wishlistActive = isInWishlist(game.id);
 
   return (
     <div className="relative min-h-screen w-full bg-gradient-to-br from-[#11002a] to-[#424242]">
@@ -140,17 +152,24 @@ const GameDetails = () => {
               <span className="text-3xl text-green-400 font-bold drop-shadow">${game.price}</span>
               <button
                 onClick={handleAddCart}
-                className="px-5 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold text-white transition-all shadow"
-                disabled={!!feedback.cart}
+                className={`px-5 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold text-white transition-all shadow ${addingCart ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                disabled={addingCart}
               >
-                {feedback.cart ? feedback.cart : "Add to Cart"}
+                {feedback.cart ? feedback.cart : addingCart ? "Adding..." : "Add to Cart"}
               </button>
               <button
-                onClick={handleAddWishlist}
-                className="px-5 py-2 bg-pink-600 hover:bg-pink-700 rounded-lg font-semibold text-white transition-all shadow"
-                disabled={!!feedback.wishlist}
+                onClick={handleWishlistToggle}
+                className={`px-5 py-2 rounded-lg font-semibold text-white transition-all shadow ${wishlistActive ? 'bg-pink-500 hover:bg-pink-600' : 'bg-pink-600 hover:bg-pink-700'
+                  }`}
               >
-                {feedback.wishlist ? feedback.wishlist : "Wishlist"}
+                {wishlistLoading
+                  ? "Loading..."
+                  : wishlistFeedback
+                    ? wishlistFeedback
+                    : wishlistActive
+                      ? "Remove from Wishlist"
+                      : "Add to Wishlist"}
               </button>
             </div>
             {(game.sysreqMin || game.sysreqRec) && (
