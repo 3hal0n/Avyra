@@ -7,8 +7,8 @@ import GameDetails from "./pages/GameDetails";
 // Optional: Add more pages as you build them
 // import Cart from "./pages/Cart";
 // import Wishlist from "./pages/Wishlist";
-// import Login from "./pages/Login";
-// import Register from "./pages/Register";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 // import NotFound from "./pages/NotFound";
 
 function App() {
@@ -17,7 +17,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/game/:id" element={<GameDetails />} />
-        
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         {/* Optional future pages */}
         {/* <Route path="/cart" element={<Cart />} />
         <Route path="/wishlist" element={<Wishlist />} />

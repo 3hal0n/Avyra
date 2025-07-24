@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import clsx from "clsx";
 import gsap from "gsap";
 import { useWindowScroll } from "react-use";
@@ -12,12 +13,12 @@ import { MdFavorite } from "react-icons/md";
 import Button from "./Button";
 
 const navItems = [
-  { label: "Home", icon: <AiFillHome /> },
-  { label: "Login", icon: <RiLoginCircleFill /> },
-  { label: "Register", icon: <FaUserPlus /> },
-  { label: "Chatbot", icon: <BsRobot /> },
-  { label: "Wishlist", icon: <MdFavorite /> },
-  { label: "Cart", icon: <FaShoppingCart /> },
+  { label: "Home", icon: <AiFillHome />, path: "/" },
+  { label: "Login", icon: <RiLoginCircleFill />, path: "/login" },
+  { label: "Register", icon: <FaUserPlus />, path: "/register" },
+  { label: "Chatbot", icon: <BsRobot />, path: "/chatbot" },
+  { label: "Wishlist", icon: <MdFavorite />, path: "/wishlist" },
+  { label: "Cart", icon: <FaShoppingCart />, path: "/cart" },
 ];
 
 const NavBar = () => {
@@ -97,15 +98,16 @@ const NavBar = () => {
           <div className="flex h-full items-center">
             <div className="hidden md:flex gap-6">
               {navItems.map((item, index) => (
-                <a
+                <Link
                   key={index}
-                  href={`#${item.label.toLowerCase()}`}
+                  to={item.path}
                   className="nav-hover-btn flex items-center gap-2"
                 >
-                  {item.icon}
-                  <span>{item.label}</span>
-                </a>
-              ))}
+    {item.icon}
+    <span>{item.label}</span>
+  </Link>
+))}
+
             </div>
 
             <button
