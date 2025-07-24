@@ -41,7 +41,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import Chatbot from "./pages/Chatbot";
-// import NotFound from "./pages/NotFound";
+import Orders from "./pages/Orders";
+
 
 function App() {
   return (
@@ -54,6 +55,7 @@ function App() {
       <Route path="/wishlist" element={<Wishlist />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/chatbot" element={<Chatbot />} />
+      <Route path="/orders" element={<Orders />} />
       {/* Optional future pages */}
       {/* <Route path="*" element={<NotFound />} /> */}
     </Routes>

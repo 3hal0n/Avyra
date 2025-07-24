@@ -30,6 +30,13 @@ public class OrderServiceImpl implements OrderService {
     private UserService userService;
 
     @Override
+    public List<Order> getOrdersForAuthenticatedUser() {
+        User user = userService.getAuthenticatedUser();
+        return orderRepository.findByUser(user);
+    }
+
+
+    @Override
     @Transactional // IMPORTANT!
     public CheckoutResponseDTO checkout() {
         User user = userService.getAuthenticatedUser();
