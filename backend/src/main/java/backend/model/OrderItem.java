@@ -1,5 +1,6 @@
 package backend.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 @Entity
@@ -12,9 +13,11 @@ public class OrderItem {
     @ManyToOne
     @MapsId("orderId")
     @JoinColumn(name = "order_id")
+    @JsonBackReference          // Prevent back reference serialization (break cycle)
     private Order order;
 
-    @ManyToOne
+    // Eager fetch to include game data in JSON response
+    @ManyToOne(fetch = FetchType.EAGER)
     @MapsId("gameId")
     @JoinColumn(name = "game_id")
     private Game game;
@@ -32,6 +35,15 @@ public class OrderItem {
         this.id = new OrderItemId(order.getId(), game.getId());
     }
 
-    // Getters and setters
-    // (Use Lombok @Data if you prefer)
+    public Order getOrder() { return order; }
+    public Game getGame() { return game; }
+    public int getQuantity() { return quantity; }
+    public double getPriceAtPurchase() { return priceAtPurchase; }
+    public OrderItemId getId() { return id; }
+
+    public void setOrder(Order order) { this.order = order; }
+    public void setGame(Game game) { this.game = game; }
+    public void setQuantity(int quantity) { this.quantity = quantity; }
+    public void setPriceAtPurchase(double p) { this.priceAtPurchase = p; }
+    public void setId(OrderItemId id) { this.id = id; }
 }

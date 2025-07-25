@@ -1,5 +1,6 @@
 package backend.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,7 +18,9 @@ public class Order {
 
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    // Enable eager fetch and manage JSON serialization to avoid cycle
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonManagedReference
     private List<OrderItem> items;
 
     public Order() {}
@@ -27,7 +30,6 @@ public class Order {
         this.createdAt = createdAt;
     }
 
-    // Getters and setters
     public Long getId() { return id; }
     public User getUser() { return user; }
     public LocalDateTime getCreatedAt() { return createdAt; }
