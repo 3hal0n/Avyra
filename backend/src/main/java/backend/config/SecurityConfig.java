@@ -110,6 +110,7 @@ public class SecurityConfig {
                                 "/api/orders/**",
                                 "/api/chatbot/**",
                                 "/api/wishlist/**",
+                                "/api/reviews/**",
                                 "/img/**", "/css/**", "/js/**",
                                 "/index.html", "/", "/favicon.ico"
                         ).permitAll()
