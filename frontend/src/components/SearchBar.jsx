@@ -1,14 +1,19 @@
-// frontend/src/components/SearchBar.jsx
 import React from "react";
 
-const SearchBar = ({ value, onChange }) => (
-  <input
-    type="text"
-    placeholder="Search games..."
-    value={value}
-    onChange={e => onChange(e.target.value)}
-    className="w-full p-2 rounded border border-gray-600 bg-gray-900 text-white"
-  />
-);
-
-export default SearchBar;
+export default function SearchBar({ value, onChange, className = "", placeholder = "", leftIcon }) {
+  return (
+    <div className="relative w-full">
+      {leftIcon}
+      <input
+        type="search"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className={`pl-12 pr-4 h-14 rounded-xl text-lg bg-[#16202c]/80 border-2 border-cyan-700/60 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-700 neon-glow shadow-lg outline-none transition-all placeholder-cyan-300 ${className}`}
+        aria-label="Search games"
+        autoComplete="off"
+        spellCheck="false"
+      />
+    </div>
+  );
+}

@@ -1,8 +1,8 @@
+import React, { useState, useRef, useEffect } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/all";
 import { TiLocationArrow } from "react-icons/ti";
-import { useEffect, useRef, useState } from "react";
 
 import Button from "./Button";
 import VideoPreview from "./VideoPreview";
@@ -12,6 +12,7 @@ gsap.registerPlugin(ScrollTrigger);
 const Hero = () => {
   const [currentIndex, setCurrentIndex] = useState(1);
   const [hasClicked, setHasClicked] = useState(false);
+  const [muted, setMuted] = useState(true); // <-- new audio state
 
   const [loading, setLoading] = useState(true);
   const [loadedVideos, setLoadedVideos] = useState(0);
@@ -23,17 +24,25 @@ const Hero = () => {
     setLoadedVideos((prev) => prev + 1);
   };
 
+  const handleMiniVdClick = () => {
+    setHasClicked(true);
+    setCurrentIndex((prevIndex) => (prevIndex % totalVideos) + 1);
+
+    // Unmute and play video on first click
+    if (muted) {
+      setMuted(false);
+      if (nextVdRef.current) {
+        nextVdRef.current.muted = false;
+        nextVdRef.current.play();
+      }
+    }
+  };
+
   useEffect(() => {
     if (loadedVideos === totalVideos - 1) {
       setLoading(false);
     }
   }, [loadedVideos]);
-
-  const handleMiniVdClick = () => {
-    setHasClicked(true);
-
-    setCurrentIndex((prevIndex) => (prevIndex % totalVideos) + 1);
-  };
 
   useGSAP(
     () => {
@@ -110,7 +119,7 @@ const Hero = () => {
                   ref={nextVdRef}
                   src={getVideoSrc((currentIndex % totalVideos) + 1)}
                   loop
-                  muted
+                  muted={muted}
                   id="current-video"
                   className="size-64 origin-center scale-150 object-cover object-center"
                   onLoadedData={handleVideoLoad}
@@ -123,7 +132,7 @@ const Hero = () => {
             ref={nextVdRef}
             src={getVideoSrc(currentIndex)}
             loop
-            muted
+            muted={muted}
             id="next-video"
             className="absolute-center invisible absolute z-20 size-64 object-cover object-center"
             onLoadedData={handleVideoLoad}
@@ -134,7 +143,7 @@ const Hero = () => {
             )}
             autoPlay
             loop
-            muted
+            muted={muted}
             className="absolute left-0 top-0 size-full object-cover object-center"
             onLoadedData={handleVideoLoad}
           />
@@ -151,12 +160,12 @@ const Hero = () => {
             </h1>
 
             <p className="mb-5 max-w-64 font-robert-regular text-blue-100">
-              Enter the Metagame Layer <br /> Unleash the Play Economy
+              The ultimate game hub <br /> Unleash the power of gaming
             </p>
 
             <Button
               id="watch-trailer"
-              title="Watch trailer"
+              title="START YOUR ADVENTURE🎮"
               leftIcon={<TiLocationArrow />}
               containerClass="bg-yellow-300 flex-center gap-1"
             />

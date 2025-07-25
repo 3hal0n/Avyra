@@ -271,3 +271,42 @@ body {
     opacity: 0.8;
   }
 }
+
+
+.neon-glow-input:focus {
+  box-shadow: 0 0 16px #3864fa99, 0 0 2px 1px #60a3fa66;
+  outline: none;
+}
+/* Tailwind CSS utilities for fancy gradient text */
+.fancy-gradient-text { 
+  @apply bg-gradient-to-r from-indigo-400 via-pink-400 to-fuchsia-500 bg-clip-text text-transparent;
+}
+
+/* Drop shadow glow effect (raw CSS, cannot use @apply) */
+.drop-shadow-glow {
+  filter: drop-shadow(0 0 8px #f472b6);
+}
+
+/* Hide scrollbar for WebKit browsers */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+
+@keyframes fadeSlideDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fadeSlideDown {
+  animation: fadeSlideDown 0.7s cubic-bezier(0.23, 1.05, 0.52, 1.02);
+}
+/* In your global CSS or tailwind.css */
+.neon-glow {
+  box-shadow: 0 0 12px 0 #00fff7b9, 0 2px 36px 0 #4f46e5a1;
+}
