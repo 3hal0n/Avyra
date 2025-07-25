@@ -28,17 +28,17 @@ const OrderDetails = () => {
     fetchOrder();
   }, [id]);
 
-  const total = order?.items?.reduce(
-    (sum, i) => sum + i.quantity * i.priceAtPurchase,
-    0
-  );
+  const total =
+    order?.items?.reduce(
+      (sum, i) => sum + i.quantity * i.priceAtPurchase,
+      0
+    ) || 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#160020] to-[#080015] text-white">
       <Navbar />
       <main className="max-w-4xl mx-auto px-6 pt-24 pb-12">
         <h1 className="text-3xl font-bold mb-6">Order Details 🧾</h1>
-
         {loading ? (
           <p>Loading...</p>
         ) : error ? (
@@ -46,25 +46,28 @@ const OrderDetails = () => {
         ) : (
           <div className="bg-gray-900 p-5 rounded-lg border border-gray-700 shadow-xl">
             <p className="mb-2 text-sm text-gray-400">
-              Placed on:{" "}
-              {new Date(order?.createdAt).toLocaleString()}
+              Placed on: {new Date(order?.createdAt).toLocaleString()}
             </p>
-            <p className="text-pink-300 mb-4 font-semibold">Order ID: {order?.id}</p>
+            <p className="text-pink-300 mb-4 font-semibold">
+              Order ID: {order?.id}
+            </p>
 
             <ul className="space-y-2">
               {order.items?.map((item, i) => (
-                <li key={i} className="flex justify-between border-b border-gray-700 pb-2">
+                <li
+                  key={item.id?.gameId || item.game?.id || item.game?.title || i}
+                  className="flex justify-between border-b border-gray-700 pb-2"
+                >
                   <span>{item.game?.title}</span>
                   <span>
-                    x{item.quantity} — $
-                    {item.priceAtPurchase.toFixed(2)}
+                    x{item.quantity} — ${item.priceAtPurchase.toFixed(2)}
                   </span>
                 </li>
               ))}
             </ul>
 
             <p className="mt-4 text-lg font-bold text-green-400">
-              Total: ${total?.toFixed(2)}
+              Total: ${total.toFixed(2)}
             </p>
 
             <button
@@ -73,7 +76,6 @@ const OrderDetails = () => {
             >
               📄 Download Invoice
             </button>
-
             <button
               onClick={() => navigate("/orders")}
               className="ml-4 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded"
@@ -90,7 +92,6 @@ const OrderDetails = () => {
 
 export default OrderDetails;
 
-// Basic invoice download (you can replace with jsPDF for better formatting)
 function generateInvoice(order, total) {
   const content = `
 INVOICE
@@ -102,8 +103,7 @@ Date: ${new Date(order.createdAt).toLocaleString()}
 Items:
 ${order.items
     .map(
-      (i) =>
-        `${i.game?.title} x${i.quantity} = $${i.priceAtPurchase.toFixed(2)}`
+      (i) => `${i.game?.title} x${i.quantity} = $${i.priceAtPurchase.toFixed(2)}`
     )
     .join("\n")}
 
