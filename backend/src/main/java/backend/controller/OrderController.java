@@ -1,8 +1,6 @@
 package backend.controller;
-//
-//import backend.dto.CheckoutResponseDTO;
-//import backend.model.Order;
-//import backend.service.OrderService;
+
+
 //import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.http.ResponseEntity;
 //import org.springframework.web.bind.annotation.*;
@@ -32,8 +30,12 @@ package backend.controller;
 //    }
 //}
 
+import backend.dto.CheckoutResponseDTO;
+import backend.model.Order;
+import backend.service.OrderService;
 
-
+import backend.model.Order;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -54,7 +56,19 @@ public class OrderController {
     @Value("${paypal.client-secret}")
     private String paypalClientSecret;
 
-    // Example: Complete PayPal Order Webhook
+    @Autowired
+    private OrderService orderService;
+    @GetMapping
+    public ResponseEntity<List<Order>> getUserOrders() {
+        return ResponseEntity.ok(orderService.getOrdersForAuthenticatedUser());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Order> getOrderById(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.getOrderByIdForAuthenticatedUser(id));
+    }
+
+    //Complete PayPal Order Webhook
     @PostMapping("/paypal-complete")
     public ResponseEntity<?> completePaypalOrder(
             @RequestBody Map<String, String> body,
