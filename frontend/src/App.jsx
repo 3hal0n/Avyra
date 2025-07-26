@@ -43,6 +43,7 @@ import Profile from "./pages/Profile";
 import Chatbot from "./pages/Chatbot";
 import Orders from "./pages/Orders";
 import OrderDetails from "./pages/OrderDetails";
+import SuccessPage from "./pages/SuccessPage";
 
 function App() {
   return (
@@ -57,6 +58,8 @@ function App() {
       <Route path="/chatbot" element={<Chatbot />} />
       <Route path="/orders" element={<Orders />} />
       <Route path="/orders/:id" element={<OrderDetails />} />
+      <Route path="/success" element={<SuccessPage />} />
+
       {/* Optional future pages */}
       {/* <Route path="*" element={<NotFound />} /> */}
     </Routes>
