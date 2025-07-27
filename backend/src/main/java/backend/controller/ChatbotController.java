@@ -1,28 +1,50 @@
 package backend.controller;
 
-import backend.dto.ChatbotRequestDTO;
-import backend.dto.ChatbotResponseDTO;
 import backend.service.ChatbotService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/chatbot")
+@CrossOrigin(origins = "*")
 public class ChatbotController {
 
     @Autowired
     private ChatbotService chatbotService;
 
-    @PostMapping("/recommend")
-    public ResponseEntity<ChatbotResponseDTO> recommend(@RequestBody ChatbotRequestDTO dto) {
-        String result = chatbotService.getRecommendation(dto.getPrompt());
-        return ResponseEntity.ok(new ChatbotResponseDTO(result));
+    @PostMapping("/chat")
+    public ResponseEntity<Map<String, Object>> chat(@RequestBody Map<String, String> request) {
+        try {
+            String userMessage = request.get("message");
+            String response = chatbotService.generateResponse(userMessage);
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "response", response
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "error", e.getMessage()
+            ));
+        }
     }
 
-    @PostMapping("/sysreq")
-    public ResponseEntity<ChatbotResponseDTO> sysreq(@RequestBody ChatbotRequestDTO dto) {
-        String result = chatbotService.getSystemRequirements(dto.getPrompt());
-        return ResponseEntity.ok(new ChatbotResponseDTO(result));
+    @GetMapping("/games")
+    public ResponseEntity<Map<String, Object>> getGames() {
+        try {
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "games", chatbotService.getGameData()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "error", e.getMessage()
+            ));
+        }
     }
 }

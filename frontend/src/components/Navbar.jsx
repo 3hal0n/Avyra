@@ -10,7 +10,7 @@ import { RiLoginCircleFill } from "react-icons/ri";
 import { FaUserPlus, FaShoppingCart, FaUserCircle } from "react-icons/fa";
 import { BsRobot } from "react-icons/bs";
 import { MdFavorite } from "react-icons/md";
-
+import ChatbotInterface from "./ChatbotInterface";
 import Button from "./Button";
 import { useAuth } from "../context/AuthContext";
 

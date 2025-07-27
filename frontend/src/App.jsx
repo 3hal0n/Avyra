@@ -11,7 +11,7 @@ import Chatbot from "./pages/Chatbot";
 import Orders from "./pages/Orders";
 import OrderDetails from "./pages/OrderDetails";
 import SuccessPage from "./pages/SuccessPage";
-
+import ChatbotInterface from "./components/ChatbotInterface";
 function App() {
   return (
     <Routes>
@@ -26,6 +26,7 @@ function App() {
       <Route path="/orders" element={<Orders />} />
       <Route path="/orders/:id" element={<OrderDetails />} />
       <Route path="/success" element={<SuccessPage />} />
+      <Route path="/chatbot-interface" element={<ChatbotInterface />} />
       {/* Optional future pages */}
       {/* <Route path="*" element={<NotFound />} /> */}
     </Routes>
