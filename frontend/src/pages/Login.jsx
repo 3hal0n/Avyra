@@ -211,7 +211,7 @@ const Login = () => {
         >
           <div className="w-full max-w-lg h-full flex items-center justify-center">
             <Canvas
-              camera={{ position: [5, 1.2, 4], fov: 50 }} //+back,
+              camera={{ position: [5, 0.5, 10], fov: 50 }} 
               style={{ width: "100%", height: 500, background: "transparent" }}
             >
               {/* Lighting */}
