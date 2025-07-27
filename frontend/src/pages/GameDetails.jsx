@@ -155,7 +155,7 @@ const GameDetails = () => {
   const [trailers, setTrailers] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const { isInWishlist, addWishlist, removeWishlist } = useWishlist();
+  const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlist();
 
   const [reviews, setReviews] = useState([]);
   const [reviewLoading, setReviewLoading] = useState(false);
@@ -242,9 +242,9 @@ const GameDetails = () => {
 
     try {
       if (isInWishlist(game.id)) {
-        await removeWishlist(game.id);
+        await removeFromWishlist(game.id);
       } else {
-        await addWishlist(game.id);
+        await addToWishlist(game.id);
       }
     } catch {
       alert("Wishlist operation failed.");

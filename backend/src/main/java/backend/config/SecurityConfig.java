@@ -110,7 +110,6 @@ public class SecurityConfig {
                                 "/api/orders/**",
                                 "/api/chatbot/**",
                                 "/api/wishlist/**",
-
                                 "/api/game_trailers/**",
                                 "/img/**", "/css/**", "/js/**",
                                 "/index.html", "/", "/favicon.ico"
