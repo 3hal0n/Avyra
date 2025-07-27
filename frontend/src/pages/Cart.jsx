@@ -1,299 +1,12 @@
-// import { useEffect, useState } from "react";
-// import axios from "axios";
-// import { useNavigate } from "react-router-dom";
-// import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
-
-// const Cart = () => {
-//   const navigate = useNavigate();
-//   const [cartItems, setCartItems] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState(null);
-//   const [updating, setUpdating] = useState(false);
-
-//   const [checkoutLoading, setCheckoutLoading] = useState(false);
-//   const [checkoutSuccess, setCheckoutSuccess] = useState(null);
-//   const [checkoutError, setCheckoutError] = useState(null);
-//   const [showPaymentModal, setShowPaymentModal] = useState(false);
-
-//   const setAuthHeader = () => {
-//     const token = localStorage.getItem("jwtToken");
-//     if (token) {
-//       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-//       return true;
-//     }
-//     return false;
-//   };
-
-//   const fetchCartItems = async () => {
-//     if (!setAuthHeader()) {
-//       setError("You must be logged in to view your cart.");
-//       setLoading(false);
-//       return;
-//     }
-//     try {
-//       setLoading(true);
-//       const response = await axios.get("http://localhost:8080/api/cart");
-//       setCartItems(response.data);
-//     } catch (err) {
-//       setError(err.response?.data?.error || "Failed to load cart.");
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchCartItems();
-//   }, []);
-
-//   const handleQuantityChange = async (gameId, newQuantity) => {
-//     if (newQuantity < 1 || updating) return;
-//     if (!setAuthHeader()) return;
-
-//     try {
-//       setUpdating(true);
-//       await axios.delete(`http://localhost:8080/api/cart/${gameId}`);
-//       await axios.post(`http://localhost:8080/api/cart/${gameId}`, null, {
-//         params: { quantity: newQuantity },
-//       });
-//       await fetchCartItems();
-//     } catch (err) {
-//       setError(err.response?.data?.error || "Failed to update cart.");
-//     } finally {
-//       setUpdating(false);
-//     }
-//   };
-
-//   const handleRemoveItem = async (gameId) => {
-//     if (!setAuthHeader()) return;
-//     try {
-//       setUpdating(true);
-//       await axios.delete(`http://localhost:8080/api/cart/${gameId}`);
-//       await fetchCartItems();
-//     } catch (err) {
-//       setError(err.response?.data?.error || "Failed to remove item.");
-//     } finally {
-//       setUpdating(false);
-//     }
-//   };
-
-//   const handleCheckout = async () => {
-//     if (!setAuthHeader()) {
-//       navigate("/login");
-//       return;
-//     }
-
-//     setCheckoutLoading(true);
-//     setCheckoutError(null);
-//     setCheckoutSuccess(null);
-
-//     try {
-//       const res = await axios.post("http://localhost:8080/api/orders/checkout");
-//       const { orderId, message, createdAt } = res.data;
-//       setCheckoutSuccess({ orderId, message, createdAt });
-//       setCartItems([]);
-//     } catch (err) {
-//       setCheckoutError(err.response?.data?.error || "Checkout failed.");
-//     } finally {
-//       setCheckoutLoading(false);
-//     }
-//   };
-
-//   const totalPrice = cartItems.reduce(
-//     (total, item) => total + item.price * item.quantity,
-//     0
-//   );
-
-//   useEffect(() => {
-//     if (!localStorage.getItem("jwtToken")) {
-//       navigate("/login");
-//     }
-//   }, [navigate]);
-
-//   return (
-//     <div className="max-w-5xl mx-auto p-6 text-white">
-//       <h1 className="text-3xl font-bold mb-6">Your Shopping Cart</h1>
-
-//       {loading ? (
-//         <div className="text-center p-10">Loading your cart...</div>
-//       ) : error ? (
-//         <div className="text-center text-red-500 p-10">
-//           <p>{error}</p>
-//           {!localStorage.getItem("jwtToken") && (
-//             <button
-//               onClick={() => navigate("/login")}
-//               className="mt-4 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded"
-//             >
-//               Go to Login
-//             </button>
-//           )}
-//         </div>
-//       ) : cartItems.length === 0 && !checkoutSuccess ? (
-//         <div className="text-center text-white p-10">Your cart is empty.</div>
-//       ) : (
-//         <>
-//           {cartItems.length > 0 && (
-//             <>
-//               <table className="w-full border-collapse border border-gray-700">
-//                 <thead>
-//                   <tr className="border-b border-gray-700">
-//                     <th className="text-left p-3">Title</th>
-//                     <th className="text-right p-3">Price</th>
-//                     <th className="text-center p-3">Quantity</th>
-//                     <th className="text-right p-3">Total</th>
-//                     <th className="p-3">Actions</th>
-//                   </tr>
-//                 </thead>
-//                 <tbody>
-//                   {cartItems.map(({ gameId, title, price, quantity }) => (
-//                     <tr key={gameId} className="border-b border-gray-700">
-//                       <td className="p-3">{title}</td>
-//                       <td className="p-3 text-right">${price.toFixed(2)}</td>
-//                       <td className="p-3 text-center">
-//                         <input
-//                           type="number"
-//                           min={1}
-//                           value={quantity}
-//                           disabled={updating}
-//                           onChange={(e) =>
-//                             handleQuantityChange(gameId, parseInt(e.target.value, 10))
-//                           }
-//                           className="w-16 text-center rounded border border-gray-600 bg-gray-900 text-white"
-//                         />
-//                       </td>
-//                       <td className="p-3 text-right">
-//                         ${(price * quantity).toFixed(2)}
-//                       </td>
-//                       <td className="p-3 text-center">
-//                         <button
-//                           disabled={updating}
-//                           onClick={() => handleRemoveItem(gameId)}
-//                           className="px-3 py-1 rounded bg-red-600 hover:bg-red-700"
-//                         >
-//                           Remove
-//                         </button>
-//                       </td>
-//                     </tr>
-//                   ))}
-//                   <tr>
-//                     <td colSpan={3} className="text-right font-bold p-3">
-//                       Total:
-//                     </td>
-//                     <td className="text-right font-bold p-3">
-//                       ${totalPrice.toFixed(2)}
-//                     </td>
-//                     <td></td>
-//                   </tr>
-//                 </tbody>
-//               </table>
-
-//               {/* Checkout Button */}
-//               <div className="mt-6 flex justify-end">
-//                 <button
-//                   onClick={() => setShowPaymentModal(true)}
-//                   disabled={cartItems.length === 0 || checkoutLoading}
-//                   className="bg-green-600 hover:bg-green-700 px-6 py-2 font-bold rounded"
-//                 >
-//                   Proceed to Payment
-//                 </button>
-//               </div>
-//             </>
-//           )}
-
-//           {/* Checkout Result or Error */}
-//           {checkoutError && (
-//             <div className="mt-4 text-red-400 font-bold">{checkoutError}</div>
-//           )}
-//           {checkoutSuccess && (
-//             <div className="mt-6 bg-green-900 p-4 rounded text-green-200 shadow-md">
-//               <h3 className="text-xl font-bold mb-2">✅ Order Successful</h3>
-//               <p>
-//                 Order ID: <b>{checkoutSuccess.orderId}</b>
-//               </p>
-//               <p>Placed on: {new Date(checkoutSuccess.createdAt).toLocaleString()}</p>
-//               <p className="mt-2">{checkoutSuccess.message}</p>
-
-//               <button
-//                 className="mt-4 bg-pink-600 hover:bg-pink-700 px-4 py-2 rounded font-semibold"
-//                 onClick={() => navigate("/orders")}
-//               >
-//                 View Orders
-//               </button>
-//             </div>
-//           )}
-//         </>
-//       )}
-
-//       {/* Payment Modal */}
-//       {showPaymentModal && (
-//         <div className="fixed inset-0 bg-black/80 z-50 flex justify-center items-center">
-//           <div className="bg-gray-900 p-6 rounded-lg max-w-md w-full border border-gray-700 shadow-xl text-white">
-//             <h2 className="text-2xl font-bold mb-4">💳 Payment Details</h2>
-//             <form
-//               onSubmit={(e) => {
-//                 e.preventDefault();
-//                 setShowPaymentModal(false);
-//                 handleCheckout();
-//               }}
-//               className="space-y-4"
-//             >
-//               <input
-//                 type="text"
-//                 required
-//                 placeholder="Cardholder Name"
-//                 className="w-full p-2 rounded bg-gray-800 border border-gray-600"
-//               />
-//               <input
-//                 type="text"
-//                 required
-//                 placeholder="Card Number"
-//                 className="w-full p-2 rounded bg-gray-800 border border-gray-600"
-//               />
-//               <div className="flex space-x-3">
-//                 <input
-//                   type="text"
-//                   required
-//                   placeholder="MM/YY"
-//                   className="w-1/2 p-2 rounded bg-gray-800 border border-gray-600"
-//                 />
-//                 <input
-//                   type="text"
-//                   required
-//                   placeholder="CVV"
-//                   className="w-1/2 p-2 rounded bg-gray-800 border border-gray-600"
-//                 />
-//               </div>
-//               <div className="flex justify-end gap-2 pt-4">
-//                 <button
-//                   type="button"
-//                   onClick={() => setShowPaymentModal(false)}
-//                   className="bg-gray-700 px-4 py-2 rounded"
-//                 >
-//                   Cancel
-//                 </button>
-//                 <button
-//                   type="submit"
-//                   disabled={checkoutLoading}
-//                   className="bg-green-600 px-5 py-2 rounded font-bold"
-//                 >
-//                   Pay $ {totalPrice.toFixed(2)}
-//                 </button>
-//               </div>
-//             </form>
-//           </div>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default Cart;
-
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+import NavBar from "../components/Navbar";
+import Footer from "../components/Footer";
 
-const PAYPAL_CLIENT_ID = "AbP9TYp3pZoaXv7UG5aYkR3LhUIsgk8XD1tdpkCF_qacfbT_j4xM0cw9DN5B4RlPlrrkbjxBOPhFmtML"; // Replace this
+const PAYPAL_CLIENT_ID =
+  "AbP9TYp3pZoaXv7UG5aYkR3LhUIsgk8XD1tdpkCF_qacfbT_j4xM0cw9DN5B4RlPlrrkbjxBOPhFmtML";
 
 const Cart = () => {
   const navigate = useNavigate();
@@ -366,8 +79,6 @@ const Cart = () => {
     }
   };
 
-  
-
   const totalPrice = cartItems.reduce(
     (total, item) => total + item.price * item.quantity,
     0
@@ -380,189 +91,313 @@ const Cart = () => {
   }, [navigate]);
 
   return (
-    <div className="max-w-5xl mx-auto p-6 text-white">
-      <h1 className="text-3xl font-bold mb-6">Your Shopping Cart</h1>
-      {loading ? (
-        <div className="text-center p-10">Loading your cart...</div>
-      ) : error ? (
-        <div className="text-center text-red-500 p-10">
-          <p>{error}</p>
-          {!localStorage.getItem("jwtToken") && (
-            <button
-              onClick={() => navigate("/login")}
-              className="mt-4 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded"
-            >
-              Go to Login
-            </button>
-          )}
-        </div>
-      ) : cartItems.length === 0 && !checkoutSuccess ? (
-        <div className="text-center text-white p-10">Your cart is empty.</div>
-      ) : (
-        <>
-          {cartItems.length > 0 && (
-            <>
-              <table className="w-full border-collapse border border-gray-700">
-                <thead>
-                  <tr className="border-b border-gray-700">
-                    <th className="text-left p-3">Title</th>
-                    <th className="text-right p-3">Price</th>
-                    <th className="text-center p-3">Quantity</th>
-                    <th className="text-right p-3">Total</th>
-                    <th className="p-3">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {cartItems.map(({ gameId, title, price, quantity }) => (
-                    <tr key={gameId} className="border-b border-gray-700">
-                      <td className="p-3">{title}</td>
-                      <td className="p-3 text-right">${price.toFixed(2)}</td>
-                      <td className="p-3 text-center">
-                        <input
-                          type="number"
-                          min={1}
-                          value={quantity}
-                          disabled={updating}
-                          onChange={(e) =>
-                            handleQuantityChange(
-                              gameId,
-                              parseInt(e.target.value, 10)
-                            )
-                          }
-                          className="w-16 text-center rounded border border-gray-600 bg-gray-900 text-white"
-                        />
-                      </td>
-                      <td className="p-3 text-right">
-                        ${(price * quantity).toFixed(2)}
-                      </td>
-                      <td className="p-3 text-center">
-                        <button
-                          disabled={updating}
-                          onClick={() => handleRemoveItem(gameId)}
-                          className="px-3 py-1 rounded bg-red-600 hover:bg-red-700"
-                        >
-                          Remove
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                  <tr>
-                    <td colSpan={3} className="text-right font-bold p-3">
-                      Total:
-                    </td>
-                    <td className="text-right font-bold p-3">
-                      ${totalPrice.toFixed(2)}
-                    </td>
-                    <td></td>
-                  </tr>
-                </tbody>
-              </table>
-              <div className="mt-6 flex justify-end">
+    <>
+      <style>{`
+        @keyframes neon-flicker {
+          0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+            opacity: 1;
+            text-shadow:
+              0 0 5px #0ff,
+              0 0 10px #0ff,
+              0 0 20px #0ff,
+              0 0 40px #07f,
+              0 0 80px #07f;
+          }
+          20%, 22%, 24%, 55% {
+            opacity: 0.8;
+            text-shadow: none;
+          }
+        }
+        .glassmorphic-bg {
+          background: rgba(20, 20, 30, 0.6);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          border-radius: 15px;
+          border: 1px solid rgba(255,255,255,0.15);
+          box-shadow: 0 0 30px #0ff;
+        }
+        .btn-neon {
+          color: #0ff;
+          border: 1.5px solid #0ff;
+          box-shadow:
+            0 0 5px #0ff,
+            0 0 8px #0ff,
+            0 0 20px #0ff;
+          transition: all 0.3s ease-in-out;
+        }
+        .btn-neon:hover {
+          color: #f0f;
+          border-color: #f0f;
+          box-shadow:
+            0 0 10px #f0f,
+            0 0 20px #f0f,
+            0 0 30px #f0f;
+        }
+        .input-neon {
+          background-color: #0a0a18;
+          border: 1.5px solid #0ff;
+          box-shadow:
+            0 0 5px #0ff,
+            0 0 10px #0ff;
+          color: #0ff;
+          transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+        .input-neon:focus {
+          outline: none;
+          border-color: #f0f;
+          box-shadow:
+            0 0 10px #f0f,
+            0 0 20px #f0f;
+          color: #f0f;
+        }
+        .table-neon th, .table-neon td {
+          border-bottom: 1px solid #222244;
+        }
+        .table-neon thead th {
+          border-bottom: 3px solid #0ff;
+          color: #0ff;
+          font-weight: 700;
+          text-shadow:
+            0 0 5px #0ff;
+        }
+        .table-neon tbody tr:hover {
+          background: rgba(255, 0, 255, 0.1);
+          box-shadow: inset 0 0 10px #f0f;
+          transition: background 0.3s ease;
+          cursor: pointer;
+        }
+        .error-neon {
+          border: 1.5px solid #f00;
+          background: rgba(255, 0, 0, 0.1);
+          box-shadow:
+            0 0 6px #f00,
+            0 0 8px #f00;
+          color: #f00;
+          padding: 12px;
+          border-radius: 8px;
+          text-align: center;
+          font-weight: 600;
+        }
+        .success-neon {
+          border: 1.5px solid #0f0;
+          background: rgba(0, 255, 0, 0.1);
+          box-shadow:
+            0 0 10px #0f0,
+            0 0 15px #0f0;
+          color: #0f0;
+          padding: 12px;
+          border-radius: 8px;
+          text-align: center;
+          font-weight: 600;
+        }
+      `}</style>
+
+      <div className="flex flex-col min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white">
+        <NavBar />
+
+        {/* Main Content flex-grow so it occupies remaining height */}
+        <main className="flex-grow p-6 max-w-6xl mx-auto overflow-auto">
+          <h1 className="text-4xl font-extrabold mb-8 tracking-wide neon-flicker select-none">
+            Cart
+          </h1>
+
+          {loading ? (
+            <div className="text-center py-20 neon-flicker text-xl">Loading your cart...</div>
+          ) : error ? (
+            <div className="error-neon max-w-xl mx-auto">
+              <p>{error}</p>
+              {!localStorage.getItem("jwtToken") && (
                 <button
-                  onClick={() => setShowPaymentModal(true)}
-                  disabled={cartItems.length === 0 || checkoutLoading}
-                  className="bg-green-600 hover:bg-green-700 px-6 py-2 font-bold rounded"
+                  onClick={() => navigate("/login")}
+                  className="btn-neon mt-6 px-6 py-3 w-full rounded font-mono tracking-wide text-lg"
                 >
-                  Proceed to Payment
+                  Go to Login
                 </button>
-              </div>
+              )}
+            </div>
+          ) : cartItems.length === 0 && !checkoutSuccess ? (
+            <div className="text-center neon-flicker text-2xl font-semibold py-20">
+              Your cart is empty.
+            </div>
+          ) : (
+            <>
+              {cartItems.length > 0 && (
+                <>
+                  <div className="overflow-x-auto rounded-lg border border-purple-800 shadow-lg shadow-purple-700/50">
+                    <table className="w-full border-collapse table-neon min-w-[720px]">
+                      <thead>
+                        <tr>
+                          <th className="text-left p-4">TITLE</th>
+                          <th className="text-right p-4">PRICE</th>
+                          <th className="text-center p-4">QUANTITY</th>
+                          <th className="text-right p-4">TOTAL</th>
+                          <th className="p-4 text-center">ACTIONS</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {cartItems.map(({ gameId, title, price, quantity }) => (
+                          <tr
+                            key={gameId}
+                            className="transition-colors duration-300 hover:bg-purple-900/20"
+                          >
+                            <td className="p-4 font-semibold text-cyan-300">{title}</td>
+                            <td className="p-4 text-right font-mono tracking-wide text-green-400">
+                              ${price.toFixed(2)}
+                            </td>
+                            <td className="p-4 text-center">
+                              <input
+                                type="number"
+                                min={1}
+                                value={quantity}
+                                disabled={updating}
+                                onChange={(e) =>
+                                  handleQuantityChange(
+                                    gameId,
+                                    parseInt(e.target.value, 10)
+                                  )
+                                }
+                                className="input-neon w-16 text-center rounded-xl font-bold text-lg"
+                              />
+                            </td>
+                            <td className="p-4 text-right font-mono font-semibold text-pink-500">
+                              ${(price * quantity).toFixed(2)}
+                            </td>
+                            <td className="p-4 text-center">
+                              <button
+                                disabled={updating}
+                                onClick={() => handleRemoveItem(gameId)}
+                                className="btn-neon rounded-xl px-5 py-2 font-semibold tracking-widest hover:scale-105 transform transition duration-200 select-none"
+                                aria-label={`Remove ${title} from cart`}
+                              >
+                                Remove
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                        <tr className="border-t border-purple-700 font-extrabold text-right text-2xl bg-gradient-to-r from-purple-900 to-purple-700/40">
+                          <td colSpan={3} className="p-4 pr-8 uppercase tracking-wide select-none">
+                            Total
+                          </td>
+                          <td className="p-4 pr-8 font-mono tracking-widest text-pink-400">
+                            ${totalPrice.toFixed(2)}
+                          </td>
+                          <td></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className="mt-8 flex justify-end">
+                    <button
+                      onClick={() => setShowPaymentModal(true)}
+                      disabled={cartItems.length === 0 || checkoutLoading}
+                      className="btn-neon bg-gradient-to-r from-cyan-500 to-purple-600 px-8 py-3 font-bold rounded-2xl tracking-wide uppercase hover:from-pink-500 hover:to-purple-400 transition-transform duration-300 transform hover:scale-110 select-none shadow-[0_0_15px_#f0f]"
+                    >
+                      Proceed to Payment
+                    </button>
+                  </div>
+                </>
+              )}
+
+              {checkoutError && (
+                <div className="error-neon max-w-xl mx-auto mt-6">{checkoutError}</div>
+              )}
+              {checkoutSuccess && (
+                <div className="success-neon max-w-xl mx-auto mt-6 p-6">
+                  <h3 className="text-2xl font-extrabold mb-4 tracking-widest">✅ Order Successful</h3>
+                  <p>
+                    Order ID: <b>{checkoutSuccess.orderId}</b>
+                  </p>
+                  <p>Placed on: {new Date(checkoutSuccess.createdAt).toLocaleString()}</p>
+                  <p className="mt-2 italic">{checkoutSuccess.message}</p>
+                  <button
+                    className="btn-neon mt-6 w-full py-3 rounded-xl font-bold text-lg"
+                    onClick={() => navigate("/orders")}
+                  >
+                    View Orders
+                  </button>
+                </div>
+              )}
             </>
           )}
 
-          {checkoutError && (
-            <div className="mt-4 text-red-400 font-bold">{checkoutError}</div>
-          )}
-          {checkoutSuccess && (
-            <div className="mt-6 bg-green-900 p-4 rounded text-green-200 shadow-md">
-              <h3 className="text-xl font-bold mb-2">✅ Order Successful</h3>
-              <p>
-                Order ID: <b>{checkoutSuccess.orderId}</b>
-              </p>
-              <p>
-                Placed on:{" "}
-                {new Date(checkoutSuccess.createdAt).toLocaleString()}
-              </p>
-              <p className="mt-2">{checkoutSuccess.message}</p>
-              <button
-                className="mt-4 bg-pink-600 hover:bg-pink-700 px-4 py-2 rounded font-semibold"
-                onClick={() => navigate("/orders")}
-              >
-                View Orders
-              </button>
-            </div>
-          )}
-        </>
-      )}
+          {/* Payment Modal */}
+          {showPaymentModal && (
+            <div className="fixed inset-0 bg-black/90 z-50 flex justify-center items-center px-4 py-8">
+              <div className="glassmorphic-bg relative max-w-3xl w-full p-8 overflow-auto max-h-[90vh] shadow-[0_0_40px_#0ff] select-none">
+                <h2 className="text-3xl font-extrabold mb-6 text-cyan-400 tracking-widest text-center drop-shadow-[0_0_10px_cyan]">
+                  💳Payment Gateway
+                </h2>
 
-      {/* Payment Modal */}
-      {showPaymentModal && (
-        <div className="fixed inset-0 bg-black/80 z-50 flex justify-center items-center">
-          <div className="bg-gray-900 p-6 rounded-lg max-w-2xl w-full border border-gray-700 shadow-xl text-white overflow-auto" style={{ minHeight: 600, maxHeight: "90vh" }}>
-            <h2 className="text-2xl font-bold mb-4">💳 Payment Details</h2>
-            <PayPalScriptProvider options={{ "client-id": PAYPAL_CLIENT_ID }}>
-              <PayPalButtons
-                style={{ layout: "vertical" }}
-                disabled={checkoutLoading}
-                forceReRender={[totalPrice]}
-                createOrder={(data, actions) => {
-                  return actions.order.create({
-                    purchase_units: [
-                      {
-                        amount: {
-                          value: totalPrice.toFixed(2),
-                          currency_code: "USD",
-                        },
-                      },
-                    ],
-                  });
-                }}
-                onApprove={async (data, actions) => {
-                  setCheckoutLoading(true);
-                  try {
-                    const token = localStorage.getItem("jwtToken");
-                    const res = await axios.post(
-                      "http://localhost:8080/api/orders/paypal-complete",
-                      { orderID: data.orderID },
-                      {
-                        headers: {
-                          Authorization: `Bearer ${token}`,
-                        },
+                <PayPalScriptProvider options={{ "client-id": PAYPAL_CLIENT_ID }}>
+                  <PayPalButtons
+                    style={{ layout: "vertical", shape: "rect", color: "blue", label: "pay" }}
+                    disabled={checkoutLoading}
+                    forceReRender={[totalPrice]}
+                    createOrder={(data, actions) => {
+                      return actions.order.create({
+                        purchase_units: [
+                          {
+                            amount: {
+                              value: totalPrice.toFixed(2),
+                              currency_code: "USD",
+                            },
+                          },
+                        ],
+                      });
+                    }}
+                    onApprove={async (data, actions) => {
+                      setCheckoutLoading(true);
+                      try {
+                        const token = localStorage.getItem("jwtToken");
+                        const res = await axios.post(
+                          "http://localhost:8080/api/orders/paypal-complete",
+                          { orderID: data.orderID },
+                          {
+                            headers: {
+                              Authorization: `Bearer ${token}`,
+                            },
+                          }
+                        );
+                        setShowPaymentModal(false);
+                        setCheckoutSuccess({
+                          orderId: data.orderID,
+                          message: res.data.message,
+                          createdAt: new Date(),
+                        });
+                        setCartItems([]);
+                        navigate("/success");
+                      } catch (err) {
+                        setCheckoutError("Order fulfillment failed.");
+                      } finally {
+                        setCheckoutLoading(false);
                       }
-                    );
-                    setShowPaymentModal(false);
-                    setCheckoutSuccess({
-                      orderId: data.orderID,
-                      message: res.data.message,
-                      createdAt: new Date(),
-                    });
-                    setCartItems([]);
-                    navigate("/success");
-                  } catch (err) {
-                    setCheckoutError("Order fulfillment failed.");
-                  } finally {
-                    setCheckoutLoading(false);
-                  }
-                }}
-                onCancel={() => setShowPaymentModal(false)}
-                onError={(err) => {
-                  setCheckoutError("Payment error: " + String(err));
-                  setShowPaymentModal(false);
-                }}
-              />
-            </PayPalScriptProvider>
-            <div className="flex justify-end pt-4">
-              <button
-                type="button"
-                onClick={() => setShowPaymentModal(false)}
-                className="bg-gray-700 px-4 py-2 rounded"
-              >
-                Cancel
-              </button>
+                    }}
+                    onCancel={() => setShowPaymentModal(false)}
+                    onError={(err) => {
+                      setCheckoutError("Payment error: " + String(err));
+                      setShowPaymentModal(false);
+                    }}
+                  />
+                </PayPalScriptProvider>
+
+                <div className="flex justify-center pt-8">
+                  <button
+                    type="button"
+                    onClick={() => setShowPaymentModal(false)}
+                    className="btn-neon px-6 py-3 rounded-xl font-bold tracking-wider hover:scale-110 transition-transform duration-300 select-none"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
-    </div>
+          )}
+        </main>
+
+        <Footer />
+      </div>
+    </>
   );
 };
 
