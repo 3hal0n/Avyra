@@ -24,13 +24,21 @@ public class ReviewController {
 
     @PostMapping
     public ResponseEntity<?> postReview(@Valid @RequestBody ReviewRequestDTO reviewDto) {
-        reviewService.addReview(reviewDto);
-        return ResponseEntity.ok("Review added");
+        try {
+            reviewService.addReview(reviewDto);
+            return ResponseEntity.ok("Review added successfully");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteReview(@PathVariable Long id) {
-        reviewService.deleteReview(id);
-        return ResponseEntity.ok("Review deleted");
+        try {
+            reviewService.deleteReview(id);
+            return ResponseEntity.ok("Review deleted successfully");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

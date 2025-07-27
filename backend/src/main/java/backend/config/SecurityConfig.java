@@ -110,11 +110,14 @@ public class SecurityConfig {
                                 "/api/orders/**",
                                 "/api/chatbot/**",
                                 "/api/wishlist/**",
-                                "/api/reviews/**",
+
                                 "/api/game_trailers/**",
                                 "/img/**", "/css/**", "/js/**",
                                 "/index.html", "/", "/favicon.ico"
                         ).permitAll()
+                        // Differentiate GET and others on reviews endpoint
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/reviews/**").permitAll()
+                        .requestMatchers("/api/reviews/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(
