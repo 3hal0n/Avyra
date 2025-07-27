@@ -111,6 +111,7 @@ public class SecurityConfig {
                                 "/api/chatbot/**",
                                 "/api/wishlist/**",
                                 "/api/reviews/**",
+                                "/api/game_trailers/**",
                                 "/img/**", "/css/**", "/js/**",
                                 "/index.html", "/", "/favicon.ico"
                         ).permitAll()
