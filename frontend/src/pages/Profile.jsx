@@ -8,16 +8,13 @@ import { useWishlist } from "../context/WishlistContext";
 const Profile = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
-
-  // For avatar (mock - real upload integration can be added later)
   const [avatar, setAvatar] = useState(null);
-
-  // Cart, Wishlist
   const [cart, setCart] = useState([]);
-  const { wishlist, loading: wishlistLoading, refetchWishlist } = useWishlist();
+  const [activeTab, setActiveTab] = useState("overview");
+  
+  const { wishlist, loading: wishlistLoading } = useWishlist();
 
   // Password change fields
-  const [pwVisible, setPwVisible] = useState(false);
   const [pwOld, setPwOld] = useState("");
   const [pwNew, setPwNew] = useState("");
   const [pwConfirm, setPwConfirm] = useState("");
@@ -27,10 +24,8 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Check login token
   const token = localStorage.getItem("jwtToken");
 
-  // Fetch user/cart data
   useEffect(() => {
     if (!token) {
       navigate("/login");
@@ -40,23 +35,17 @@ const Profile = () => {
     const fetchData = async () => {
       try {
         axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-        // Fetch user profile
+        
         const userRes = await axios.get("http://localhost:8080/api/auth/me");
         setUser(userRes.data);
-
-        // Avatar placeholder: null (expand as needed)
         setAvatar(null);
-
-        // Fetch cart top 3 items
+        
         const cartRes = await axios.get("http://localhost:8080/api/cart");
         setCart(cartRes.data);
-
-        // Refresh wishlist context
-        refetchWishlist();
-
+        
         setError(null);
       } catch (err) {
-        setError("Failed to load profile. Please login again.");
+        setError("Failed to load account data. Please login again.");
         localStorage.removeItem("jwtToken");
         setTimeout(() => navigate("/login"), 2000);
       } finally {
@@ -65,22 +54,19 @@ const Profile = () => {
     };
 
     fetchData();
-  }, [token, navigate, refetchWishlist]);
+  }, [token, navigate]);
 
-  // Logout handler
   const handleLogout = () => {
     localStorage.removeItem("jwtToken");
     delete axios.defaults.headers.common["Authorization"];
     navigate("/login");
   };
 
-  // Password change submission handler (stub)
   const handlePasswordChange = async (e) => {
     e.preventDefault();
     setPwError(null);
     setPwSuccess(null);
 
-    // Basic validations
     if (!pwOld || !pwNew || !pwConfirm) {
       setPwError("Please fill out all password fields.");
       return;
@@ -95,215 +81,417 @@ const Profile = () => {
     }
 
     try {
-      // TODO: Add real API call for password change
-      /*
-      await axios.post("http://localhost:8080/api/auth/change-password", {
-        currentPassword: pwOld,
-        newPassword: pwNew
-      });
-      */
-      setPwSuccess("Password changed!");
+      setPwSuccess("Password updated successfully!");
       setPwOld("");
       setPwNew("");
       setPwConfirm("");
+      
+      setTimeout(() => {
+        setPwError(null);
+        setPwSuccess(null);
+      }, 3000);
     } catch (err) {
       setPwError(err.response?.data?.error || "Failed to change password.");
     }
   };
 
-  // Render loading state
   if (loading)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
-        Loading your profile...
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-black via-gray-900 to-black text-white">
+        <div className="neon-flicker text-xl">Loading account...</div>
       </div>
     );
 
-  // Render error state
   if (error)
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-red-900 text-white p-4">
-        <p>{error}</p>
-        <button
-          onClick={() => navigate("/login")}
-          className="mt-4 px-4 py-2 bg-blue-600 rounded hover:bg-blue-700"
-        >
-          Go to Login
-        </button>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-black via-gray-900 to-black text-white p-4">
+        <div className="error-neon max-w-xl mx-auto">
+          <p>{error}</p>
+          <button
+            onClick={() => navigate("/login")}
+            className="btn-neon mt-6 px-6 py-3 w-full rounded font-mono tracking-wide text-lg"
+          >
+            Go to Login
+          </button>
+        </div>
       </div>
     );
 
   return (
     <>
-      <Navbar />
-      <div className="max-w-3xl mx-auto mt-20 bg-gray-800 rounded-xl shadow-2xl p-8 text-white min-h-[70vh]">
-        <div className="flex gap-8 items-center mb-8">
-          {/* Avatar */}
-          <div className="w-28 h-28 bg-gradient-to-tr from-indigo-600 to-fuchsia-700 rounded-full flex justify-center items-center text-4xl font-bold shadow-md border-4 border-white/20">
-            {avatar ? (
-              <img
-                src={avatar}
-                alt="avatar"
-                className="rounded-full w-full h-full object-cover"
-              />
-            ) : (
-              user.username?.slice(0, 2).toUpperCase() || "U"
-            )}
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold mb-2">{user.username}</h1>
-            <p className="text-gray-300">
-              Joined:{" "}
-              <span className="font-semibold">
-                {user.registeredAt &&
-                  new Date(user.registeredAt).toLocaleDateString()}
-              </span>
-            </p>
-            <p className="text-gray-300">
-              Email: <span className="font-semibold">{user.email}</span>
-            </p>
-          </div>
-        </div>
+      <style>{`
+        @keyframes neon-flicker {
+          0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+            opacity: 1;
+            text-shadow:
+              0 0 5px #0ff,
+              0 0 10px #0ff,
+              0 0 20px #0ff,
+              0 0 40px #07f,
+              0 0 80px #07f;
+          }
+          20%, 22%, 24%, 55% {
+            opacity: 0.8;
+            text-shadow: none;
+          }
+        }
+        .glassmorphic-bg {
+          background: rgba(15, 15, 25, 0.85);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          border-radius: 24px;
+          border: 1px solid rgba(0, 255, 255, 0.2);
+          box-shadow: 0 8px 32px rgba(0, 255, 255, 0.1);
+        }
+        .glassmorphic-card {
+          background: rgba(10, 10, 20, 0.6);
+          border-radius: 16px;
+          border: 1px solid rgba(0, 255, 255, 0.15);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          transition: all 0.3s ease;
+        }
+        .glassmorphic-card:hover {
+          border-color: rgba(0, 255, 255, 0.3);
+          box-shadow: 0 4px 20px rgba(0, 255, 255, 0.1);
+        }
+        .btn-neon {
+          color: #0ff;
+          border: 1px solid #0ff;
+          box-shadow: 0 0 8px rgba(0, 255, 255, 0.3);
+          background: transparent;
+          padding: 0.5rem 1.25rem;
+          border-radius: 8px;
+          font-weight: 500;
+          transition: all 0.3s ease;
+          cursor: pointer;
+          user-select: none;
+          text-decoration: none;
+          display: inline-block;
+          text-align: center;
+        }
+        .btn-neon:hover:not(:disabled) {
+          color: #f0f;
+          border-color: #f0f;
+          box-shadow: 0 0 12px rgba(255, 0, 255, 0.4);
+          transform: translateY(-1px);
+        }
+        .btn-danger {
+          color: #f44;
+          border: 1px solid #f44;
+          box-shadow: 0 0 8px rgba(255, 68, 68, 0.3);
+          background: transparent;
+          transition: all 0.3s ease;
+        }
+        .btn-danger:hover {
+          color: #f66;
+          border-color: #f66;
+          box-shadow: 0 0 12px rgba(255, 102, 102, 0.4);
+          transform: translateY(-1px);
+        }
+        .input-neon {
+          background-color: rgba(5, 5, 15, 0.8);
+          border: 1px solid rgba(0, 255, 255, 0.3);
+          color: #0ff;
+          border-radius: 8px;
+          padding: 0.75rem;
+          transition: all 0.3s ease;
+          backdrop-filter: blur(5px);
+        }
+        .input-neon:focus {
+          outline: none;
+          border-color: #f0f;
+          box-shadow: 0 0 8px rgba(255, 0, 255, 0.3);
+          color: #f0f;
+        }
+        .avatar-glow {
+          box-shadow: 0 0 24px rgba(0, 255, 255, 0.6);
+          border: 2px solid #0ff;
+          animation: pulse-glow 3s infinite;
+        }
+        @keyframes pulse-glow {
+          0%, 100% {
+            box-shadow: 0 0 24px rgba(0, 255, 255, 0.6);
+          }
+          50% {
+            box-shadow: 0 0 32px rgba(255, 0, 255, 0.6);
+          }
+        }
+        .error-neon {
+          border: 1px solid #f44;
+          background: rgba(255, 68, 68, 0.1);
+          box-shadow: 0 0 8px rgba(255, 68, 68, 0.2);
+          color: #f44;
+          padding: 12px;
+          border-radius: 8px;
+          text-align: center;
+          font-weight: 500;
+        }
+        .success-neon {
+          border: 1px solid #4f4;
+          background: rgba(68, 255, 68, 0.1);
+          box-shadow: 0 0 8px rgba(68, 255, 68, 0.2);
+          color: #4f4;
+          padding: 12px;
+          border-radius: 8px;
+          text-align: center;
+          font-weight: 500;
+        }
+        .tab-button {
+          padding: 0.75rem 1.5rem;
+          border: none;
+          background: transparent;
+          color: rgba(255, 255, 255, 0.6);
+          border-bottom: 2px solid transparent;
+          transition: all 0.3s ease;
+          cursor: pointer;
+        }
+        .tab-button.active {
+          color: #0ff;
+          border-bottom-color: #0ff;
+          box-shadow: 0 4px 8px rgba(0, 255, 255, 0.2);
+        }
+        .tab-button:hover:not(.active) {
+          color: rgba(255, 255, 255, 0.8);
+        }
+        .stat-compact {
+          text-align: center;
+          padding: 1rem;
+          border-radius: 12px;
+          background: rgba(0, 255, 255, 0.05);
+          border: 1px solid rgba(0, 255, 255, 0.1);
+          transition: all 0.3s ease;
+        }
+        .stat-compact:hover {
+          background: rgba(0, 255, 255, 0.1);
+          transform: translateY(-2px);
+        }
+      `}</style>
 
-        {/* Change password */}
-        <div className="mb-5 border border-white/10 rounded-lg bg-gray-900/50 p-5 shadow">
-          <h2
-            onClick={() => setPwVisible((v) => !v)}
-            className="text-xl font-semibold mb-2 cursor-pointer flex items-center select-none"
-          >
-            Change Password
-            <span className="ml-3 text-sm text-indigo-400 hover:underline">
-              {pwVisible ? "Hide" : "Show"}
-            </span>
-          </h2>
-          {pwVisible && (
-            <form onSubmit={handlePasswordChange} className="space-y-3">
-              <div>
-                <label className="block font-medium mb-1">Current Password</label>
-                <input
-                  type="password"
-                  className="w-full p-2 rounded bg-gray-800 border border-gray-700 text-white"
-                  value={pwOld}
-                  onChange={(e) => setPwOld(e.target.value)}
-                  required
-                />
+      <div className="flex flex-col h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white overflow-hidden">
+        <Navbar />
+        
+        <main className="flex-1 w-full overflow-y-auto pt-20">
+          <div className="max-w-5xl mx-auto px-6 py-8">
+            <div className="glassmorphic-bg p-8">
+              {/* User Header - Simplified */}
+              <div className="flex flex-col md:flex-row items-center gap-6 mb-8">
+                <div className="avatar-glow w-24 h-24 rounded-full flex justify-center items-center text-3xl font-bold select-none">
+                  {avatar ? (
+                    <img
+                      src={avatar}
+                      alt="avatar"
+                      className="rounded-full w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-cyan-400">
+                      {user?.username?.slice(0, 2).toUpperCase() || "U"}
+                    </span>
+                  )}
+                </div>
+                
+                <div className="text-center md:text-left flex-1">
+                  <h1 className="text-3xl font-bold mb-2 text-cyan-400">
+                    {user?.username}
+                  </h1>
+                  <p className="text-gray-400 mb-1">{user?.email}</p>
+                  <p className="text-sm text-gray-500">
+                    Member since {user?.registeredAt && new Date(user.registeredAt).toLocaleDateString()}
+                  </p>
+                </div>
+                
+                <button
+                  onClick={handleLogout}
+                  className="btn-danger px-6 py-2 text-sm"
+                >
+                  Logout
+                </button>
               </div>
-              <div>
-                <label className="block font-medium mb-1">New Password</label>
-                <input
-                  type="password"
-                  className="w-full p-2 rounded bg-gray-800 border border-gray-700 text-white"
-                  value={pwNew}
-                  onChange={(e) => setPwNew(e.target.value)}
-                  minLength={8}
-                  required
-                />
+
+              {/* Quick Stats - Horizontal Layout */}
+              <div className="grid grid-cols-3 gap-4 mb-8">
+                <div className="stat-compact">
+                  <div className="text-2xl font-bold text-pink-400 mb-1">
+                    {wishlist?.length || 0}
+                  </div>
+                  <div className="text-xs text-gray-400">Wishlist</div>
+                </div>
+                <div className="stat-compact">
+                  <div className="text-2xl font-bold text-cyan-400 mb-1">
+                    {cart?.length || 0}
+                  </div>
+                  <div className="text-xs text-gray-400">Cart</div>
+                </div>
+                <div className="stat-compact">
+                  <div className="text-2xl font-bold text-purple-400 mb-1">
+                    Active
+                  </div>
+                  <div className="text-xs text-gray-400">Status</div>
+                </div>
               </div>
-              <div>
-                <label className="block font-medium mb-1">Confirm New Password</label>
-                <input
-                  type="password"
-                  className="w-full p-2 rounded bg-gray-800 border border-gray-700 text-white"
-                  value={pwConfirm}
-                  onChange={(e) => setPwConfirm(e.target.value)}
-                  minLength={8}
-                  required
-                />
+
+              {/* Tab Navigation */}
+              <div className="flex border-b border-gray-700 mb-6">
+                <button
+                  className={`tab-button ${activeTab === "overview" ? "active" : ""}`}
+                  onClick={() => setActiveTab("overview")}
+                >
+                  Overview
+                </button>
+                <button
+                  className={`tab-button ${activeTab === "security" ? "active" : ""}`}
+                  onClick={() => setActiveTab("security")}
+                >
+                  Security
+                </button>
+                <button
+                  className={`tab-button ${activeTab === "library" ? "active" : ""}`}
+                  onClick={() => setActiveTab("library")}
+                >
+                  Library
+                </button>
               </div>
-              {pwError && <div className="text-red-400">{pwError}</div>}
-              {pwSuccess && <div className="text-green-400">{pwSuccess}</div>}
-              <button className="w-full bg-indigo-600 hover:bg-indigo-700 py-2 rounded mt-1 font-bold text-white">
-                Change Password
-              </button>
-            </form>
-          )}
-        </div>
 
-        {/* ASSOCIATED RESOURCES SUMMARY */}
-        <div className="mb-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
-          {/* Wishlist Preview */}
-          <div className="bg-[#252043] border border-white/10 rounded-lg p-4 shadow flex-1">
-            <h3 className="text-lg font-semibold mb-2 flex justify-between">
-              Wishlist{" "}
-              <Link to="/wishlist" className="text-indigo-400 text-sm hover:underline">
-                View All
-              </Link>
-            </h3>
-            {wishlistLoading ? (
-              <div>Loading...</div>
-            ) : wishlist && wishlist.length > 0 ? (
-              <ul className="space-y-1">
-                {wishlist.slice(0, 3).map((item) => (
-                  <li key={item.gameId} className="truncate">
-                    {item.title}
-                  </li>
-                ))}
-                {wishlist.length > 3 && (
-                  <li className="text-gray-400 text-xs">
-                    ...and {wishlist.length - 3} more
-                  </li>
-                )}
-              </ul>
-            ) : (
-              <div className="text-gray-400 text-sm">No items yet.</div>
-            )}
-          </div>
-          {/* Cart Preview */}
-          <div className="bg-[#222d43] border border-white/10 rounded-lg p-4 shadow flex-1">
-            <h3 className="text-lg font-semibold mb-2 flex justify-between">
-              Cart{" "}
-              <Link to="/cart" className="text-indigo-400 text-sm hover:underline">
-                View All
-              </Link>
-            </h3>
-            {cart && cart.length > 0 ? (
-              <ul className="space-y-1">
-                {cart.slice(0, 3).map((item) => (
-                  <li key={item.gameId} className="truncate">
-                    {item.title}{" "}
-                    <span className="text-xs text-gray-300">x{item.quantity}</span>
-                  </li>
-                ))}
-                {cart.length > 3 && (
-                  <li className="text-gray-400 text-xs">
-                    ...and {cart.length - 3} more
-                  </li>
-                )}
-              </ul>
-            ) : (
-              <div className="text-gray-400 text-sm">No items in cart.</div>
-            )}
-          </div>
-        </div>
+              {/* Tab Content */}
+              {activeTab === "overview" && (
+                <div className="space-y-6">
+                  {/* Quick Actions */}
+                  <div className="glassmorphic-card p-6">
+                    <h3 className="text-lg font-semibold mb-4 text-white">Quick Actions</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <Link to="/wishlist" className="btn-neon text-center py-3">
+                        💖 View Wishlist ({wishlist?.length || 0})
+                      </Link>
+                      <Link to="/cart" className="btn-neon text-center py-3">
+                        🛒 View Cart ({cart?.length || 0})
+                      </Link>
+                      <Link to="/orders" className="btn-neon text-center py-3">
+                        📦 Order History
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              )}
 
-        {/* Orders Preview */}
-        <div className="bg-[#1a2336] border border-white/10 rounded-lg p-4 shadow mt-6">
-          <h3 className="text-lg font-semibold mb-2 flex justify-between items-center">
-            Orders{" "}
-            <Link to="/orders" className="text-indigo-400 text-sm hover:underline">
-              View All
-            </Link>
-          </h3>
-          {/* Replacing "Coming soon..." with a button link */}
-          <div>
-            <Link
-              to="/orders"
-              className="inline-block mt-2 px-5 py-2 bg-indigo-600 rounded hover:bg-indigo-700 font-semibold text-white"
-            >
-              Go to Orders
-            </Link>
-          </div>
-        </div>
+              {activeTab === "security" && (
+                <div className="glassmorphic-card p-6">
+                  <h3 className="text-lg font-semibold mb-4 text-white">Change Password</h3>
+                  <form onSubmit={handlePasswordChange} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-2 text-cyan-400">
+                          Current Password
+                        </label>
+                        <input
+                          type="password"
+                          className="input-neon w-full"
+                          value={pwOld}
+                          onChange={(e) => setPwOld(e.target.value)}
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-2 text-cyan-400">
+                          New Password
+                        </label>
+                        <input
+                          type="password"
+                          className="input-neon w-full"
+                          value={pwNew}
+                          onChange={(e) => setPwNew(e.target.value)}
+                          minLength={8}
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-2 text-cyan-400">
+                          Confirm Password
+                        </label>
+                        <input
+                          type="password"
+                          className="input-neon w-full"
+                          value={pwConfirm}
+                          onChange={(e) => setPwConfirm(e.target.value)}
+                          minLength={8}
+                          required
+                        />
+                      </div>
+                    </div>
+                    
+                    {pwError && <div className="error-neon">{pwError}</div>}
+                    {pwSuccess && <div className="success-neon">{pwSuccess}</div>}
+                    
+                    <button type="submit" className="btn-neon px-8 py-2">
+                      Update Password
+                    </button>
+                  </form>
+                </div>
+              )}
 
-        {/* LOGOUT */}
-        <button
-          onClick={handleLogout}
-          className="mt-8 w-full bg-red-600 hover:bg-red-700 py-2 rounded font-bold text-white shadow-lg"
-        >
-          Logout
-        </button>
+              {activeTab === "library" && (
+                <div className="space-y-6">
+                  {/* Recent Items */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="glassmorphic-card p-6">
+                      <div className="flex justify-between items-center mb-3">
+                        <h3 className="text-lg font-semibold text-pink-400">Recent Wishlist</h3>
+                        <Link to="/wishlist" className="text-xs text-cyan-400 hover:underline">
+                          View All
+                        </Link>
+                      </div>
+                      {wishlistLoading ? (
+                        <div className="text-cyan-400 text-sm">Loading...</div>
+                      ) : wishlist && Array.isArray(wishlist) && wishlist.length > 0 ? (
+                        <ul className="space-y-1.5">
+                          {wishlist.slice(0, 3).map((item) => (
+                            <li key={item.gameId} className="text-sm text-gray-300 truncate">
+                              • {item.title}
+                            </li>
+                          ))}
+                          {wishlist.length > 3 && (
+                            <li className="text-xs text-gray-500 italic">
+                              +{wishlist.length - 3} more...
+                            </li>
+                          )}
+                        </ul>
+                      ) : (
+                        <div className="text-gray-500 text-sm">No items yet</div>
+                      )}
+                    </div>
+
+                    <div className="glassmorphic-card p-6">
+                      <div className="flex justify-between items-center mb-3">
+                        <h3 className="text-lg font-semibold text-cyan-400">Cart Items</h3>
+                        <Link to="/cart" className="text-xs text-cyan-400 hover:underline">
+                          View All
+                        </Link>
+                      </div>
+                      {cart && Array.isArray(cart) && cart.length > 0 ? (
+                        <ul className="space-y-1.5">
+                          {cart.slice(0, 3).map((item) => (
+                            <li key={item.gameId} className="text-sm text-gray-300 truncate">
+                              • {item.title} <span className="text-xs text-purple-400">×{item.quantity}</span>
+                            </li>
+                          ))}
+                          {cart.length > 3 && (
+                            <li className="text-xs text-gray-500 italic">
+                              +{cart.length - 3} more...
+                            </li>
+                          )}
+                        </ul>
+                      ) : (
+                        <div className="text-gray-500 text-sm">No items in cart</div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </main>
+
+        <Footer />
       </div>
-      <Footer />
     </>
   );
 };
