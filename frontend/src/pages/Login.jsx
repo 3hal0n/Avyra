@@ -55,16 +55,10 @@ const Login = () => {
       <NavBar />
 
       {/* Main content - split layout */}
-      <main className="flex flex-1 flex-col md:flex-row items-center justify-center px-4 sm:px-6 lg:px-8 py-10 gap-10">
-        {/* Left: Login form */}
-        <section
-          className="w-full max-w-md
-          bg-[#0f0f16] bg-opacity-80 border border-purple-600
-          rounded-2xl p-10 shadow-neon flex flex-col
-          mt-10 md:mt-24
-          ml-0 md:ml-16
-          md:self-start"
-        >
+      <main className="flex flex-1 flex-col md:flex-row items-center justify-center px-4 sm:px-8 lg:px-28 py-10 gap-10">
+        {/* Left: Register Form */}
+        <section className="w-full max-w-md bg-[#0f0f16] bg-opacity-80 border border-pink-600 rounded-2xl p-10 shadow-neon flex flex-col mt-12 md:mt-24 ml-2 md:ml-10 md:self-start">
+        
           <h2 className="text-center text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 mb-8 tracking-widest neon-text">
             LOGIN
           </h2>
@@ -215,7 +209,7 @@ const Login = () => {
               style={{ width: "100%", height: 500, background: "transparent" }}
             >
               {/* Lighting */}
-              <ambientLight intensity={0.8} />
+              <ambientLight intensity={1} />
               <directionalLight position={[1, 2, 3]} intensity={0.65} />
               {/* 3D Model */}
               <LoginCharacter />

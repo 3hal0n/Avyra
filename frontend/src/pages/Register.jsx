@@ -4,8 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Canvas } from '@react-three/fiber';
 import NavBar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { RegisterCharacter } from "../components/RegisterCharacter";
-import { LoginCharacter } from "../components/LoginCharacter";
+import {RegisterCharacter} from '../components/RegisterCharacter';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -157,11 +156,24 @@ const Register = () => {
               type="submit"
               disabled={loading}
               className="
-                w-full py-3 rounded bg-gradient-to-r from-pink-500 via-fuchsia-600 to-purple-600
-                text-white font-extrabold text-lg tracking-wide shadow-neon-button
-                hover:from-fuchsia-700 hover:via-purple-700 hover:to-pink-700
-                transition-colors duration-300 disabled:opacity-50
-                disabled:cursor-not-allowed uppercase
+                w-full
+                py-3
+                rounded
+                bg-gradient-to-r
+                from-pink-500
+                via-purple-600
+                to-blue-600
+                text-white
+                font-extrabold
+                text-lg
+                tracking-wide
+                shadow-neon-button
+                hover:from-pink-600 hover:via-purple-700 hover:to-blue-700
+                transition-colors
+                duration-300
+                disabled:opacity-50
+                disabled:cursor-not-allowed
+                uppercase
               "
             >
               {loading ? "Registering..." : "Register"}
@@ -173,19 +185,19 @@ const Register = () => {
           </p>
         </section>
 
-        {/* Right: Spiderman 3D Model in Canvas */}
         <section className="hidden md:flex flex-1 items-center justify-center">
           <div className="w-full max-w-lg h-full flex items-center justify-center">
             <Canvas camera={{ position: [0, 0, 4], fov: 50 }} style={{ width: '100%', height: 500 }}>
               <ambientLight intensity={0.8} />
               <directionalLight position={[1, 2, 3]} intensity={0.65} />
-              {/* <RegisterCharacter /> */}
-              <LoginCharacter />
+               <RegisterCharacter />
             </Canvas>
           </div>
         </section>
       </main>
+
       <Footer />
+      
       <style>{`
         @keyframes bgShift {
           0% { background-position: 0% 50%; }

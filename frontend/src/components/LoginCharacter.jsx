@@ -14,13 +14,13 @@ export function LoginCharacter(props) {
   }, [actions, animations])
 
   return (
-    <group ref={group} {...props} dispose={null} position={[-0.7, -3.2, 0]}>
+    <group ref={group} {...props} dispose={null} position={[-0.7, -4.6, 0]}>
       <group name="Sketchfab_Scene">
         <group name="Sketchfab_model" rotation={[-Math.PI / 2, 0, 0]}>
           <group
             name="042b8bc53dd94ecda2a9117428da0c7bfbx"
             rotation={[Math.PI / 2, 0, 0]}
-            scale={0.018}
+            scale={0.03}
           >
             <group name="Object_2">
               <group name="RootNode">
