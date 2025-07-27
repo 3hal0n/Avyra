@@ -33,90 +33,169 @@ function Home() {
   }, [search, genre, platform, minPrice, maxPrice]);
 
   return (
-    <main className="relative min-h-screen w-screen bg-gradient-to-b from-[#0e1118] via-[#141628] to-[#191e29] text-white">
-      <NavBar />
-      <Hero />
-
-      {/* -- Maximum width responsive container for main content -- */}
-      <div className="relative z-10 max-w-7xl mx-auto px-2 sm:px-6 pt-10 pb-12">
-        {/* -- Futuristic Search+Filter Bar -- */}
-        <div className="relative w-full mb-12 flex flex-col items-stretch">
-          <div className="relative w-full flex flex-col md:flex-row gap-4 items-center justify-between rounded-2xl border border-cyan-700/30 bg-gradient-to-br from-[#152041]/80 via-[#222464]/80 to-[#151628]/80 shadow-[0_8px_40px_0_rgba(40,255,255,0.08)] backdrop-blur-lg p-6 md:p-8 transition-all">
-
-            {/* Floating label */}
-            <div className="absolute -top-7 left-7 text-xs sm:text-base bg-gradient-to-r from-cyan-500/80 to-violet-600/60 px-5 py-1 rounded-full shadow font-semibold tracking-wide text-cyan-100 border border-cyan-600/60 select-none">
-              Find Your Next Game
-            </div>
-
-            {/* SearchBar (grows to 45–60% of bar) */}
-            <div className="flex-1 min-w-0 w-full md:max-w-[60%] relative">
-              <SearchBar
-                value={search}
-                onChange={setSearch}
-                placeholder="Search games, publishers, tags..."
-                className="w-full h-14 text-lg bg-[#16202c]/80 border-2 border-cyan-700/60 focus:border-cyan-400 hover:border-violet-400 neon-glow focus:ring-2 focus:ring-cyan-700 transition-all shadow-lg outline-none"
-                leftIcon={<HiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400 text-2xl pointer-events-none" />}
-              />
-            </div>
-
-            {/* Filters (takes up to 40% of bar, never below search) */}
-            <div className="md:flex-1 min-w-0 w-full flex gap-2 flex-wrap md:justify-end mt-4 md:mt-0">
-              <Filters
-                genre={genre}
-                setGenre={setGenre}
-                platform={platform}
-                setPlatform={setPlatform}
-                minPrice={minPrice}
-                setMinPrice={setMinPrice}
-                maxPrice={maxPrice}
-                setMaxPrice={setMaxPrice}
-                variant="bar"
-              />
-            </div>
-          </div>
-
-          {/* -- Active Filter chips -- */}
-          {activeFilters.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-4 px-2">
-              {activeFilters.map((filter, i) => (
-                <span
-                  key={i}
-                  className="inline-flex items-center px-3 py-1 bg-gradient-to-r from-cyan-700 via-blue-700 to-fuchsia-600 text-white rounded-full shadow hover:scale-105 transition cursor-pointer"
-                  onClick={filter.onRemove}
-                  role="button"
-                  tabIndex={0}
-                  aria-label={`Clear filter ${filter.label}`}
-                >
-                  {filter.label}
-                  <span className="ml-2 text-xl">&times;</span>
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* -- Games list / loading -- */}
-        <section>
-          {loading ? (
-            <div id="products-section" className="flex justify-center items-center py-20">
-              <div className="px-8 py-3 text-cyan-200 bg-gradient-to-r from-transparent via-cyan-800/70 to-transparent rounded-2xl shadow animate-pulse font-semibold tracking-wide">
-                Loading games...
-              </div>
-            </div>
-          ) : (
-            <GameList games={games} />
-          )}
-        </section>
-      </div>
-
-      {/* Glow accent / underlay */}
+    <div className="relative min-h-screen w-screen bg-black text-white overflow-hidden">
+      {/* Background gradient with animated shift */}
+      <div className="absolute inset-0 -z-10 bg-gradient-to-tr from-purple-900 via-pink-900 to-pink-700 animate-bgShift"></div>
+      
+      {/* Scanlines overlay */}
       <div
-        aria-hidden
-        className="pointer-events-none fixed left-1/2 bottom-[-240px] z-0 w-[120vw] h-[400px] -translate-x-1/2 blur-[120px] opacity-50 bg-gradient-to-br from-cyan-700 via-violet-700 to-fuchsia-700"
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0 -z-10 scanlines"
       />
 
-      <Footer />
-    </main>
+      <main className="relative z-10 min-h-screen">
+        <NavBar />
+        <Hero />
+
+        {/* -- Maximum width responsive container for main content -- */}
+        <div className="relative z-10 max-w-7xl mx-auto px-2 sm:px-6 pt-10 pb-12">
+          <div className="relative w-full mb-12 flex flex-col items-stretch">
+  <div className="w-full flex flex-col md:flex-row gap-4 items-center justify-between rounded-xl border border-pink-600 bg-[#161320]/90 shadow-lg backdrop-blur p-5 transition-all">
+    {/* Floating label */}
+    <div className="absolute -top-7 left-7 text-xs sm:text-base bg-[#26112e] px-5 py-1 rounded-full shadow font-semibold tracking-wide text-pink-400 border border-pink-700 select-none">
+      Find Your Next Game
+    </div>
+    {/* SearchBar */}
+    <div className="flex-1 min-w-0 w-full md:max-w-[60%] relative">
+      <div className="relative w-full">
+        <HiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-pink-400 text-xl pointer-events-none" />
+        <input
+          type="search"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Search games, publishers, tags..."
+          className="
+            pl-10 pr-4 h-12 rounded-lg text-base
+            bg-[#171124]/90 border-2 border-pink-600
+            focus:border-pink-400 focus:ring-2 focus:ring-pink-400
+            shadow transition outline-none placeholder-pink-300 text-white
+          "
+          aria-label="Search games"
+        />
+      </div>
+    </div>
+    {/* Filters */}
+    <div className="md:flex-1 min-w-0 w-full flex gap-2 flex-wrap md:justify-end mt-4 md:mt-0">
+      <select
+        value={genre}
+        onChange={e => setGenre(e.target.value)}
+        className="
+          rounded-lg bg-[#191328] border-2 border-pink-600
+          text-white px-4 py-2 text-base
+          focus:outline-none focus:border-pink-400
+          transition shadow placeholder-pink-300
+        "
+        aria-label="Filter by genre"
+      >
+        <option value="">All Genres</option>
+        {["Action", "Adventure", "RPG", "Indie", "Shooter", "Puzzle"].map(g => (
+          <option key={g} value={g}>{g}</option>
+        ))}
+      </select>
+      <select
+        value={platform}
+        onChange={e => setPlatform(e.target.value)}
+        className="
+          rounded-lg bg-[#191328] border-2 border-pink-600
+          text-white px-4 py-2 text-base
+          focus:outline-none focus:border-pink-400
+          transition shadow placeholder-pink-300
+        "
+        aria-label="Filter by platform"
+      >
+        <option value="">All Platforms</option>
+        {["PC", "PlayStation", "Xbox", "Switch", "Mobile"].map(p => (
+          <option key={p} value={p}>{p}</option>
+        ))}
+      </select>
+      <input
+        type="number"
+        min="0"
+        value={minPrice}
+        onChange={e => setMinPrice(e.target.value)}
+        placeholder="Min $"
+        className="
+          w-[6rem] rounded-lg bg-[#191328] border-2 border-pink-600
+          text-white px-3 py-2 text-base
+          focus:outline-none focus:border-pink-400
+          placeholder-pink-300 shadow transition
+        "
+        aria-label="Minimum price filter"
+      />
+      <input
+        type="number"
+        min="0"
+        value={maxPrice}
+        onChange={e => setMaxPrice(e.target.value)}
+        placeholder="Max $"
+        className="
+          w-[6rem] rounded-lg bg-[#191328] border-2 border-pink-600
+          text-white px-3 py-2 text-base
+          focus:outline-none focus:border-pink-400
+          placeholder-pink-300 shadow transition
+        "
+        aria-label="Maximum price filter"
+      />
+    </div>
+  </div>
+</div>
+
+
+          {/* -- Games list / loading -- */}
+          <section>
+            {loading ? (
+              <div
+                id="products-section"
+                className="flex justify-center items-center py-20"
+              >
+                <div className="px-8 py-3 text-pink-400 bg-gradient-to-r from-transparent via-pink-700/70 to-transparent rounded-2xl shadow animate-pulse font-semibold tracking-wide">
+                  Loading games...
+                </div>
+              </div>
+            ) : (
+              <GameList games={games} />
+            )}
+          </section>
+        </div>
+
+        {/* Glow accent / underlay */}
+        <div
+          aria-hidden
+          className="pointer-events-none fixed left-1/2 bottom-[-240px] z-0 w-[120vw] h-[400px] -translate-x-1/2 blur-[120px] opacity-50 bg-gradient-to-br from-pink-700 via-fuchsia-700 to-pink-900"
+        />
+
+        <Footer />
+      </main>
+
+      <style>{`
+        @keyframes bgShift {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        .animate-bgShift {
+          background-size: 200% 200%;
+          animation: bgShift 15s ease infinite;
+        }
+        .scanlines {
+          background-image: repeating-linear-gradient(
+            0deg,
+            rgba(255,255,255,0.03),
+            rgba(255,255,255,0.03) 1px,
+            transparent 2px,
+            transparent 4px
+          );
+          pointer-events: none;
+          z-index: 5;
+          mix-blend-mode: screen;
+        }
+        .neon-glow {
+          filter:
+            drop-shadow(0 0 6px #ff66cc)
+            drop-shadow(0 0 10px #cc33ff);
+        }
+      `}</style>
+    </div>
   );
 }
 

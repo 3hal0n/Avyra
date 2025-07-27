@@ -12,7 +12,7 @@ gsap.registerPlugin(ScrollTrigger);
 const Hero = () => {
   const [currentIndex, setCurrentIndex] = useState(1);
   const [hasClicked, setHasClicked] = useState(false);
-  const [muted, setMuted] = useState(true); // <-- new audio state
+  const [muted, setMuted] = useState(true);
 
   const [loading, setLoading] = useState(true);
   const [loadedVideos, setLoadedVideos] = useState(0);
@@ -43,6 +43,24 @@ const Hero = () => {
       setLoading(false);
     }
   }, [loadedVideos]);
+
+  // Listen to global audio mute events for synchronization with NavBar
+  useEffect(() => {
+    const onGlobalMute = (e) => {
+      setMuted(e.detail.muted);
+      if (nextVdRef.current) {
+        nextVdRef.current.muted = e.detail.muted;
+        if (e.detail.muted) {
+          nextVdRef.current.pause();
+        } else {
+          nextVdRef.current.play();
+        }
+      }
+    };
+
+    window.addEventListener("global-audio-mute", onGlobalMute);
+    return () => window.removeEventListener("global-audio-mute", onGlobalMute);
+  }, []);
 
   useGSAP(
     () => {
@@ -106,7 +124,7 @@ const Hero = () => {
 
       <div
         id="video-frame"
-        className="relative z-10 h-dvh w-screen overflow-hidden rounded-lg bg-blue-75"
+        className="relative z-10 h-dvh w-screen overflow-hidden rounded-lg bg-gradient-to-br from-purple-900 via-pink-900 to-black"
       >
         <div>
           <div className="mask-clip-path absolute-center absolute z-50 size-64 cursor-pointer overflow-hidden rounded-lg">
@@ -149,17 +167,17 @@ const Hero = () => {
           />
         </div>
 
-        <h1 className="special-font hero-heading absolute bottom-5 right-5 z-40 text-blue-75">
+        <h1 className="special-font hero-heading absolute bottom-5 right-5 z-40 text-white">
           G<b>A</b>MING
         </h1>
 
         <div className="absolute left-0 top-0 z-40 size-full">
           <div className="mt-24 px-5 sm:px-10">
-            <h1 className="special-font hero-heading text-blue-100">
+            <h1 className="special-font hero-heading text-white">
               avy<b>r</b>a
             </h1>
 
-            <p className="mb-5 max-w-64 font-robert-regular text-blue-100">
+            <p className="mb-5 max-w-64 font-robert-regular text-white">
               The ultimate game hub <br /> Unleash the power of gaming
             </p>
 

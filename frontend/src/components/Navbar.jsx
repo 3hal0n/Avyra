@@ -22,6 +22,7 @@ const NavBar = () => {
   // Refs
   const audioElementRef = useRef(null);
   const navContainerRef = useRef(null);
+  const profileMenuRef = useRef(null);
 
   // Scroll control
   const { y: currentScrollY } = useWindowScroll();
@@ -34,7 +35,6 @@ const NavBar = () => {
 
   // Profile dropdown
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const profileMenuRef = useRef(null);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -51,26 +51,31 @@ const NavBar = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showProfileMenu]);
 
-  // Audio toggle
+  // Audio toggle - fixes muting/unmuting immediately
   const toggleAudioIndicator = () => {
-  setIsAudioPlaying((prev) => !prev);
-  setIsIndicatorActive((prev) => !prev);
-
-  // Dispatch event to inform Hero to toggle mute/unmute
-  window.dispatchEvent(new Event("toggleAudioMute"));
-};
-
-  useEffect(() => {
     if (!audioElementRef.current) return;
-    if (isAudioPlaying) {
-      audioElementRef.current.play();
-    } else {
-      audioElementRef.current.pause();
-    }
-  }, [isAudioPlaying]);
 
-  // Navbar scroll show/hide
+    if (isAudioPlaying) {
+      // Mute and pause audio immediately
+      audioElementRef.current.muted = true;
+      audioElementRef.current.pause();
+      setIsAudioPlaying(false);
+      setIsIndicatorActive(false);
+      // Dispatch event so other components can react
+      window.dispatchEvent(new CustomEvent("global-audio-mute", { detail: { muted: true } }));
+    } else {
+      // Unmute and play audio immediately
+      audioElementRef.current.muted = false;
+      audioElementRef.current.play();
+      setIsAudioPlaying(true);
+      setIsIndicatorActive(true);
+      window.dispatchEvent(new CustomEvent("global-audio-mute", { detail: { muted: false } }));
+    }
+  };
+
+  // Navbar scroll show/hide logic
   useEffect(() => {
+    if (!navContainerRef.current) return;
     if (currentScrollY === 0) {
       setIsNavVisible(true);
       navContainerRef.current.classList.remove("floating-nav");
@@ -86,6 +91,7 @@ const NavBar = () => {
 
   // Animate navbar slide
   useEffect(() => {
+    if (!navContainerRef.current) return;
     gsap.to(navContainerRef.current, {
       y: isNavVisible ? 0 : -100,
       opacity: isNavVisible ? 1 : 0,
@@ -114,147 +120,151 @@ const NavBar = () => {
   const navItems = isAuthenticated ? authNavItems : guestNavItems;
 
   const scrollToProducts = () => {
-    // Works only if on Home page or page contains the section
     const el = document.getElementById("products-section");
     if (el) {
       el.scrollIntoView({ behavior: "smooth", block: "start" });
     } else {
-      // If section not present (on other pages), navigate home and let Home do scroll on load
       navigate("/");
     }
   };
 
   return (
-    <div
-      ref={navContainerRef}
-      className="fixed inset-x-0 top-4 z-50 h-16 border border-blue-900/40 rounded-xl bg-gradient-to-br from-[#171e38]/85 via-[#131933]/85 to-[#090c22]/80 backdrop-blur-xl shadow-lg transition-all duration-500"
-      role="banner"
-    >
-      <header className="absolute top-1/2 w-full -translate-y-1/2">
-        <nav className="flex items-center justify-between px-6 md:px-12">
-          {/* Logo + Products button */}
-          <div className="flex items-center gap-7">
-            <Link to="/" aria-label="Go to Home">
-              <img
-                src="/img/logo.png"
-                alt="Avyra logo"
-                className="w-12 fancy-gradient-text drop-shadow-glow"
+    <>
+      <audio
+        ref={audioElementRef}
+        src="/audio/game-trailer.mp3"
+        loop
+        muted
+        preload="auto"
+      />
+      <div
+        ref={navContainerRef}
+        className="fixed inset-x-0 top-4 z-50 h-16 border border-pink-900/70 rounded-xl bg-gradient-to-br from-[#2d0232]/85 via-[#1c072e]/85 to-[#0a0519]/80 backdrop-blur-xl shadow-lg transition-all duration-500"
+        role="banner"
+      >
+        <header className="absolute top-1/2 w-full -translate-y-1/2">
+          <nav className="flex items-center justify-between px-6 md:px-12">
+            {/* Logo + Products button */}
+            <div className="flex items-center gap-7">
+              <Link to="/" aria-label="Go to Home">
+                <img
+                  src="/img/logo.png"
+                  alt="Avyra logo"
+                  className="w-12 fancy-gradient-text drop-shadow-glow"
+                />
+              </Link>
+
+              <Button
+                id="product-button"
+                title="Products"
+                rightIcon={<TiLocationArrow />}
+                containerClass="hidden md:flex items-center justify-center gap-1 bg-blue-600 hover:bg-pink-600 text-black rounded shadow px-3 py-1 text-xs font-bold transition"
+                onClick={scrollToProducts}
               />
-            </Link>
-
-            <Button
-              id="product-button"
-              title="Products"
-              rightIcon={<TiLocationArrow />}
-              containerClass="hidden md:flex items-center justify-center gap-1 bg-pink-600 hover:bg-[#2a3270] text-white rounded shadow px-3 py-1 text-xs font-bold transition"
-              onClick={scrollToProducts}
-            />
-          </div>
-
-          {/* Navigation & user controls */}
-          <div className="flex items-center">
-            <div className="hidden md:flex gap-6 items-center">
-              {navItems.map(({ label, icon, path }) => (
-                <Link
-                  key={path}
-                  to={path}
-                  className="nav-hover-btn flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-blue-900/50 hover:text-indigo-300 text-sm font-semibold uppercase tracking-wider transition duration-200"
-                >
-                  {icon}
-                  <span>{label}</span>
-                </Link>
-              ))}
-
-              {isAuthenticated && (
-                <div className="relative" ref={profileMenuRef}>
-                  <button
-                    onClick={() => setShowProfileMenu((prev) => !prev)}
-                    className="flex items-center gap-2 focus:outline-none rounded hover:ring-2 hover:ring-violet-600 focus:ring-2 focus:ring-blue-400 transition"
-                    aria-haspopup="menu"
-                    aria-expanded={showProfileMenu}
-                    aria-label="User profile menu"
-                  >
-                    {user?.avatarUrl ? (
-                      <img
-                        src={user.avatarUrl}
-                        alt={`${user.username} avatar`}
-                        className="w-8 h-8 rounded-full object-cover drop-shadow-glow"
-                      />
-                    ) : (
-                      <FaUserCircle className="w-8 h-8 text-indigo-200" />
-                    )}
-                    <span className="font-semibold select-none">
-                      {user?.username}
-                    </span>
-                  </button>
-
-                  {showProfileMenu && (
-                    <div
-                      className="absolute right-0 mt-2 w-48 bg-gradient-to-br from-[#232a4e]/95 to-[#0d1022]/90 border border-blue-900 rounded-lg shadow-xl z-50 animate-fade-in p-1"
-                      role="menu"
-                    >
-                      <div className="px-4 py-2 border-b border-blue-700/40">
-                        <p className="font-bold text-indigo-200 truncate">
-                          {user?.username}
-                        </p>
-                        <p className="text-xs text-gray-400 truncate">
-                          {user?.email}
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => {
-                          setShowProfileMenu(false);
-                          navigate("/profile");
-                        }}
-                        className="block w-full text-left px-4 py-2 text-white hover:bg-indigo-600/30 rounded transition"
-                        role="menuitem"
-                      >
-                        View Profile
-                      </button>
-                      <button
-                        onClick={() => {
-                          setShowProfileMenu(false);
-                          logout();
-                        }}
-                        className="block w-full text-left px-4 py-2 text-pink-400 hover:bg-pink-700/40 rounded transition"
-                        role="menuitem"
-                      >
-                        Logout
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
 
-            {/* Audio visualizer */}
+            {/* Navigation & user controls */}
+            <div className="flex items-center">
+              <div className="hidden md:flex gap-6 items-center">
+                {navItems.map(({ label, icon, path }) => (
+                  <Link
+                    key={path}
+                    to={path}
+                    className="nav-hover-btn flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-pink-900/50 hover:text-pink-300 text-sm font-semibold uppercase tracking-wider transition duration-200"
+                  >
+                    {icon}
+                    <span>{label}</span>
+                  </Link>
+                ))}
 
+                {isAuthenticated && (
+                  <div className="relative" ref={profileMenuRef}>
+                    <button
+                      onClick={() => setShowProfileMenu((prev) => !prev)}
+                      className="flex items-center gap-2 focus:outline-none rounded hover:ring-2 hover:ring-pink-600 focus:ring-2 focus:ring-pink-400 transition"
+                      aria-haspopup="menu"
+                      aria-expanded={showProfileMenu}
+                      aria-label="User profile menu"
+                    >
+                      {user?.avatarUrl ? (
+                        <img
+                          src={user.avatarUrl}
+                          alt={`${user.username} avatar`}
+                          className="w-8 h-8 rounded-full object-cover drop-shadow-glow"
+                        />
+                      ) : (
+                        <FaUserCircle className="w-8 h-8 text-pink-400" />
+                      )}
+                      <span className="font-semibold select-none text-pink-300">
+                        {user?.username}
+                      </span>
+                    </button>
 
-            <button
-              onClick={toggleAudioIndicator}
-              className="ml-8 flex items-center space-x-1 focus:outline-none"
-              aria-label="Toggle audio"
-            >
-              {[1, 2, 3, 4].map((bar) => (
-                <div
-                  key={bar}
-                  className={clsx(
-                    "h-3 w-1 mx-0.5 rounded bg-indigo-400/70 transition-all duration-200",
-                    { "bg-pink-300/90": isIndicatorActive }
-                  )}
-                  style={{
-  animation: isIndicatorActive
-    ? `indicator-line 0.5s infinite ${bar * 0.1}s`
-    : undefined,
-}}
+                    {showProfileMenu && (
+                      <div
+                        className="absolute right-0 mt-2 w-48 bg-gradient-to-br from-[#491244]/95 to-[#25052a]/90 border border-pink-900 rounded-lg shadow-xl z-50 animate-fade-in p-1"
+                        role="menu"
+                      >
+                        <div className="px-4 py-2 border-b border-pink-700/40">
+                          <p className="font-bold text-pink-400 truncate">
+                            {user?.username}
+                          </p>
+                          <p className="text-xs text-pink-500 truncate">
+                            {user?.email}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => {
+                            setShowProfileMenu(false);
+                            navigate("/profile");
+                          }}
+                          className="block w-full text-left px-4 py-2 text-pink-300 hover:bg-pink-700/40 rounded transition"
+                          role="menuitem"
+                        >
+                          View Profile
+                        </button>
+                        <button
+                          onClick={() => {
+                            setShowProfileMenu(false);
+                            logout();
+                          }}
+                          className="block w-full text-left px-4 py-2 text-pink-500 hover:bg-pink-700/40 rounded transition"
+                          role="menuitem"
+                        >
+                          Logout
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
 
-                />
-              ))}
-            </button>
-          </div>
-        </nav>
-      </header>
-    </div>
+              {/* Audio visualizer button */}
+              <button
+                onClick={toggleAudioIndicator}
+                aria-label={isAudioPlaying ? "Mute audio" : "Unmute audio"}
+                className="ml-8 flex items-center space-x-1 focus:outline-none"
+              >
+                {[1, 2, 3, 4].map((bar) => (
+                  <div
+                    key={bar}
+                    className={clsx(
+                      "h-3 w-1 mx-0.5 rounded bg-pink-500/70 transition-all duration-200",
+                      { "bg-pink-400/90": isIndicatorActive }
+                    )}
+                    style={{
+                      animation: isIndicatorActive
+                        ? `indicator-line 0.5s infinite ${bar * 0.1}s`
+                        : undefined,
+                    }}
+                  />
+                ))}
+              </button>
+            </div>
+          </nav>
+        </header>
+      </div>
+    </>
   );
 };
 
