@@ -374,7 +374,8 @@ const Cart = () => {
                         setCartItems([]);
 
                         // Optional: Navigate to success page
-                        navigate("/success");
+                        navigate("/success", { state: { gameTitle: cartItems[0]?.title } });
+
                       } catch (error) {
                         console.error("Payment approval failed:", error);
 

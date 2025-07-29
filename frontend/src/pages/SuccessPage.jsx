@@ -1,5 +1,7 @@
 import React from "react";
 import { useLocation } from "react-router-dom";
+import Footer from "../components/Footer";
+import NavBar from "../components/Navbar";
 
 function getFilenameFromGameTitle(title) {
   return title.toLowerCase().replace(/\s+/g, "_") + ".zip";
@@ -7,7 +9,8 @@ function getFilenameFromGameTitle(title) {
 
 const SuccessPage = () => {
   const location = useLocation();
-  const gameTitle = location.state?.gameTitle || "game"; // fallback
+  // Read gameTitle from navigation state passed by Cart
+  const gameTitle = location.state?.gameTitle || "game";
   const filename = getFilenameFromGameTitle(gameTitle);
   const token = localStorage.getItem("jwtToken");
 
@@ -36,6 +39,7 @@ const SuccessPage = () => {
 
   return (
     <div className="p-6 max-w-md mx-auto text-center">
+      <NavBar />
       <h1 className="text-2xl font-bold mb-4">Payment Successful!</h1>
       <p className="mb-6">Thank you for your purchase. You can download your game below.</p>
       <button
@@ -44,6 +48,7 @@ const SuccessPage = () => {
       >
         Download {gameTitle}
       </button>
+      <Footer />
     </div>
   );
 };
