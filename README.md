@@ -5,6 +5,14 @@
 ![PayPal](https://img.shields.io/badge/Payments-PayPal-00457C?logo=paypal)
 ![JWT](https://img.shields.io/badge/Auth-JWT-orange?logo=jsonwebtokens)
 
+![GitHub last commit](https://img.shields.io/github/last-commit/3hal0n/Avyra)
+![GitHub repo size](https://img.shields.io/github/repo-size/3hal0n/Avyra)
+![GitHub issues](https://img.shields.io/github/issues/3hal0n/Avyra)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/3hal0n/Avyra)
+![GitHub license](https://img.shields.io/github/license/3hal0n/Avyra)
+
+![Build](https://img.shields.io/github/actions/workflow/status/3hal0n/Avyra/main.yml?label=build)
+
 Avyra is a Steam-inspired fullstack web application built with a **React** frontend and a **Java Spring Boot** backend. It provides a modern, interactive platform for users to browse, purchase, review, and download games, with features such as authentication, wishlist, cart, chatbot assistant, and more.
 
 ---
