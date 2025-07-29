@@ -1,4 +1,9 @@
 # Avyra Game Download Platform
+![React](https://img.shields.io/badge/Frontend-React-blue?logo=react)
+![Spring Boot](https://img.shields.io/badge/Backend-SpringBoot-green?logo=springboot)
+![Tailwind CSS](https://img.shields.io/badge/Style-TailwindCSS-38bdf8?logo=tailwindcss)
+![PayPal](https://img.shields.io/badge/Payments-PayPal-00457C?logo=paypal)
+![JWT](https://img.shields.io/badge/Auth-JWT-orange?logo=jsonwebtokens)
 
 Avyra is a Steam-inspired fullstack web application built with a **React** frontend and a **Java Spring Boot** backend. It provides a modern, interactive platform for users to browse, purchase, review, and download games, with features such as authentication, wishlist, cart, chatbot assistant, and more.
 
