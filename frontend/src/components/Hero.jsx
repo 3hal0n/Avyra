@@ -3,6 +3,7 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/all";
 import { TiLocationArrow } from "react-icons/ti";
+import { FaVolumeMute, FaVolumeUp } from "react-icons/fa";
 
 import Button from "./Button";
 import VideoPreview from "./VideoPreview";
@@ -19,6 +20,7 @@ const Hero = () => {
 
   const totalVideos = 4;
   const nextVdRef = useRef(null);
+  const audioRef = useRef(null);
 
   const handleVideoLoad = () => {
     setLoadedVideos((prev) => prev + 1);
@@ -28,14 +30,46 @@ const Hero = () => {
     setHasClicked(true);
     setCurrentIndex((prevIndex) => (prevIndex % totalVideos) + 1);
 
-    // Unmute and play video on first click
+    // On first click, unmute and play video and audio
     if (muted) {
       setMuted(false);
       if (nextVdRef.current) {
         nextVdRef.current.muted = false;
         nextVdRef.current.play();
       }
+      if (audioRef.current) {
+        audioRef.current.muted = false;
+        audioRef.current.play();
+      }
+      // Dispatch to global for sync (optional)
+      window.dispatchEvent(new CustomEvent("global-audio-mute", { detail: { muted: false } }));
     }
+  };
+
+  const toggleMute = () => {
+    const newMuted = !muted;
+    setMuted(newMuted);
+
+    if (nextVdRef.current) {
+      nextVdRef.current.muted = newMuted;
+      if (newMuted) {
+        nextVdRef.current.pause();
+      } else {
+        nextVdRef.current.play();
+      }
+    }
+
+    if (audioRef.current) {
+      audioRef.current.muted = newMuted;
+      if (newMuted) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+    }
+
+    // Dispatch global mute event for synchronization
+    window.dispatchEvent(new CustomEvent("global-audio-mute", { detail: { muted: newMuted } }));
   };
 
   useEffect(() => {
@@ -44,7 +78,7 @@ const Hero = () => {
     }
   }, [loadedVideos]);
 
-  // Listen to global audio mute events for synchronization with NavBar
+  // Listen to global audio mute events for sync with NavBar (if still used elsewhere)
   useEffect(() => {
     const onGlobalMute = (e) => {
       setMuted(e.detail.muted);
@@ -54,6 +88,14 @@ const Hero = () => {
           nextVdRef.current.pause();
         } else {
           nextVdRef.current.play();
+        }
+      }
+      if (audioRef.current) {
+        audioRef.current.muted = e.detail.muted;
+        if (e.detail.muted) {
+          audioRef.current.pause();
+        } else {
+          audioRef.current.play();
         }
       }
     };
@@ -122,6 +164,15 @@ const Hero = () => {
         </div>
       )}
 
+      {/* Audio element for hero section */}
+      <audio
+        ref={audioRef}
+        src="/audio/game-trailer.mp3"
+        loop
+        muted={muted}
+        preload="auto"
+      />
+
       <div
         id="video-frame"
         className="relative z-10 h-dvh w-screen overflow-hidden rounded-lg bg-gradient-to-br from-purple-900 via-pink-900 to-black"
@@ -166,6 +217,16 @@ const Hero = () => {
             onLoadedData={handleVideoLoad}
           />
         </div>
+
+        {/* Mute/Unmute button in hero section */}
+        <button
+          onClick={toggleMute}
+          aria-label={muted ? "Unmute video and audio" : "Mute video and audio"}
+          className="absolute top-20 right-5 z-50 rounded-full bg-black bg-opacity-50 p-3 text-white hover:bg-opacity-80 transition"
+          title={muted ? "Unmute" : "Mute"}
+        >
+          {muted ? <FaVolumeMute size={20} /> : <FaVolumeUp size={20} />}
+        </button>
 
         <h1 className="special-font hero-heading absolute bottom-5 right-5 z-40 text-white">
           G<b>A</b>MING

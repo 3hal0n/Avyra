@@ -15,12 +15,9 @@ import Button from "./Button";
 import { useAuth } from "../context/AuthContext";
 
 const NavBar = () => {
-  // Audio & animation state
-  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
-  const [isIndicatorActive, setIsIndicatorActive] = useState(false);
+  // Removed audio state and refs
 
   // Refs
-  const audioElementRef = useRef(null);
   const navContainerRef = useRef(null);
   const profileMenuRef = useRef(null);
 
@@ -50,28 +47,6 @@ const NavBar = () => {
     }
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showProfileMenu]);
-
-  // Audio toggle - fixes muting/unmuting immediately
-  const toggleAudioIndicator = () => {
-    if (!audioElementRef.current) return;
-
-    if (isAudioPlaying) {
-      // Mute and pause audio immediately
-      audioElementRef.current.muted = true;
-      audioElementRef.current.pause();
-      setIsAudioPlaying(false);
-      setIsIndicatorActive(false);
-      // Dispatch event so other components can react
-      window.dispatchEvent(new CustomEvent("global-audio-mute", { detail: { muted: true } }));
-    } else {
-      // Unmute and play audio immediately
-      audioElementRef.current.muted = false;
-      audioElementRef.current.play();
-      setIsAudioPlaying(true);
-      setIsIndicatorActive(true);
-      window.dispatchEvent(new CustomEvent("global-audio-mute", { detail: { muted: false } }));
-    }
-  };
 
   // Navbar scroll show/hide logic
   useEffect(() => {
@@ -130,13 +105,6 @@ const NavBar = () => {
 
   return (
     <>
-      <audio
-        ref={audioElementRef}
-        src="/audio/game-trailer.mp3"
-        loop
-        muted
-        preload="auto"
-      />
       <div
         ref={navContainerRef}
         className="fixed inset-x-0 top-4 z-50 h-16 border border-pink-900/70 rounded-xl bg-gradient-to-br from-[#2d0232]/85 via-[#1c072e]/85 to-[#0a0519]/80 backdrop-blur-xl shadow-lg transition-all duration-500"
@@ -209,9 +177,7 @@ const NavBar = () => {
                           <p className="font-bold text-pink-400 truncate">
                             {user?.username}
                           </p>
-                          <p className="text-xs text-pink-500 truncate">
-                            {user?.email}
-                          </p>
+                          <p className="text-xs text-pink-500 truncate">{user?.email}</p>
                         </div>
                         <button
                           onClick={() => {
@@ -239,27 +205,7 @@ const NavBar = () => {
                 )}
               </div>
 
-              {/* Audio visualizer button */}
-              <button
-                onClick={toggleAudioIndicator}
-                aria-label={isAudioPlaying ? "Mute audio" : "Unmute audio"}
-                className="ml-8 flex items-center space-x-1 focus:outline-none"
-              >
-                {[1, 2, 3, 4].map((bar) => (
-                  <div
-                    key={bar}
-                    className={clsx(
-                      "h-3 w-1 mx-0.5 rounded bg-pink-500/70 transition-all duration-200",
-                      { "bg-pink-400/90": isIndicatorActive }
-                    )}
-                    style={{
-                      animation: isIndicatorActive
-                        ? `indicator-line 0.5s infinite ${bar * 0.1}s`
-                        : undefined,
-                    }}
-                  />
-                ))}
-              </button>
+              
             </div>
           </nav>
         </header>
