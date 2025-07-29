@@ -236,13 +236,7 @@ const Cart = () => {
                     {new Date(checkoutSuccess.createdAt).toLocaleString()}
                   </p>
                   <p className="mt-2 italic">{checkoutSuccess.message}</p>
-                  {/* <button
-                    className="btn-neon mt-6 w-full py-3 rounded-xl font-bold text-lg"
-                    onClick={() => navigate("/orders")}
-                  >
-                    View Downloads
-                  </button> */}
-
+                  
                   <button
                     className="btn-neon mt-6 w-full py-3 rounded-xl font-bold text-lg"
                     onClick={async () => {

@@ -365,8 +365,8 @@ const Profile = () => {
                       <Link to="/cart" className="btn-neon text-center py-3">
                         🛒 View Cart ({cart?.length || 0})
                       </Link>
-                      <Link to="/orders" className="btn-neon text-center py-3">
-                        📦 Order History
+                      <Link to="/downloads" className="btn-neon text-center py-3">
+                        📦 Download History
                       </Link>
                     </div>
                   </div>
