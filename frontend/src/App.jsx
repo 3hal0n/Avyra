@@ -8,8 +8,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import Chatbot from "./pages/Chatbot";
-import Orders from "./pages/Orders";
-import OrderDetails from "./pages/OrderDetails";
+import Downloads from "./pages/Downloads";
+import DownloadDetails from "./pages/DownloadDetails";
 import SuccessPage from "./pages/SuccessPage";
 import ChatbotInterface from "./components/ChatbotInterface";
 function App() {
@@ -23,8 +23,8 @@ function App() {
       <Route path="/wishlist" element={<Wishlist />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/chatbot" element={<Chatbot />} />
-      <Route path="/orders" element={<Orders />} />
-      <Route path="/orders/:id" element={<OrderDetails />} />
+      <Route path="/downloads" element={<Downloads />} />
+      <Route path="/downloads/:id" element={<DownloadDetails />} />
       <Route path="/success" element={<SuccessPage />} />
       <Route path="/chatbot-interface" element={<ChatbotInterface />} />
       {/* Optional future pages */}
