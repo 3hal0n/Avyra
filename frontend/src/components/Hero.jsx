@@ -49,28 +49,31 @@ const Hero = () => {
   const toggleMute = () => {
     const newMuted = !muted;
     setMuted(newMuted);
+    // The effect below will sync media elements accordingly
 
+    // Dispatch global mute event for synchronization
+    window.dispatchEvent(new CustomEvent("global-audio-mute", { detail: { muted: newMuted } }));
+  };
+
+  // Ensure muted state is properly enforced on videos and audio every time currentIndex or muted changes
+  useEffect(() => {
     if (nextVdRef.current) {
-      nextVdRef.current.muted = newMuted;
-      if (newMuted) {
+      nextVdRef.current.muted = muted;
+      if (muted) {
         nextVdRef.current.pause();
       } else {
         nextVdRef.current.play();
       }
     }
-
     if (audioRef.current) {
-      audioRef.current.muted = newMuted;
-      if (newMuted) {
+      audioRef.current.muted = muted;
+      if (muted) {
         audioRef.current.pause();
       } else {
         audioRef.current.play();
       }
     }
-
-    // Dispatch global mute event for synchronization
-    window.dispatchEvent(new CustomEvent("global-audio-mute", { detail: { muted: newMuted } }));
-  };
+  }, [muted, currentIndex]);
 
   useEffect(() => {
     if (loadedVideos === totalVideos - 1) {
@@ -78,7 +81,7 @@ const Hero = () => {
     }
   }, [loadedVideos]);
 
-  // Listen to global audio mute events for sync with NavBar (if still used elsewhere)
+  // Listen to global audio mute events for sync with other components
   useEffect(() => {
     const onGlobalMute = (e) => {
       setMuted(e.detail.muted);
@@ -115,7 +118,7 @@ const Hero = () => {
           height: "100%",
           duration: 1,
           ease: "power1.inOut",
-          onStart: () => nextVdRef.current.play(),
+          onStart: () => nextVdRef.current?.play(),
         });
         gsap.from("#current-video", {
           transformOrigin: "center center",
@@ -165,13 +168,7 @@ const Hero = () => {
       )}
 
       {/* Audio element for hero section */}
-      <audio
-        ref={audioRef}
-        src="/audio/game-trailer.mp3"
-        loop
-        muted={muted}
-        preload="auto"
-      />
+      <audio ref={audioRef} src="/audio/game-trailer.mp3" loop muted={muted} preload="auto" />
 
       <div
         id="video-frame"
@@ -207,9 +204,7 @@ const Hero = () => {
             onLoadedData={handleVideoLoad}
           />
           <video
-            src={getVideoSrc(
-              currentIndex === totalVideos - 1 ? 1 : currentIndex
-            )}
+            src={getVideoSrc(currentIndex === totalVideos - 1 ? 1 : currentIndex)}
             autoPlay
             loop
             muted={muted}
@@ -222,7 +217,7 @@ const Hero = () => {
         <button
           onClick={toggleMute}
           aria-label={muted ? "Unmute video and audio" : "Mute video and audio"}
-          className="absolute top-20 right-5 z-50 rounded-full bg-black bg-opacity-50 p-3 text-white hover:bg-opacity-80 transition"
+          className="absolute top-20 right-5 z-[100] rounded-full bg-black bg-opacity-50 p-3 text-white hover:bg-opacity-80 transition"
           title={muted ? "Unmute" : "Mute"}
         >
           {muted ? <FaVolumeMute size={20} /> : <FaVolumeUp size={20} />}
