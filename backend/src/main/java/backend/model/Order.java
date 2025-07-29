@@ -16,6 +16,9 @@ public class Order {
     @ManyToOne
     private User user;
 
+    @Column(name = "paypal_order_id")
+    private String paypalOrderId;
+
     private LocalDateTime createdAt;
 
     // Enable eager fetch and manage JSON serialization to avoid cycle
@@ -29,6 +32,15 @@ public class Order {
         this.user = user;
         this.createdAt = createdAt;
     }
+
+    public String getPaypalOrderId() {
+        return paypalOrderId;
+    }
+
+    public void setPaypalOrderId(String paypalOrderId) {
+        this.paypalOrderId = paypalOrderId;
+    }
+
 
     public Long getId() { return id; }
     public User getUser() { return user; }

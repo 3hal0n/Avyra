@@ -75,4 +75,33 @@ public class OrderServiceImpl implements OrderService {
 
         return new CheckoutResponseDTO(order.getId(), "Checkout successful!", order.getCreatedAt());
     }
+
+    @Override
+    @Transactional
+    public Order completePaypalOrder(String paypalOrderId) {
+        User user = userService.getAuthenticatedUser();
+
+        List<CartItem> cartItems = cartItemRepository.findByUser(user);
+        if (cartItems.isEmpty()) {
+            throw new RuntimeException("Cart is empty.");
+        }
+
+        Order order = new Order(user, LocalDateTime.now());
+        order.setPaypalOrderId(paypalOrderId); // You must have a field in Order entity
+        order = orderRepository.save(order);
+
+        for (CartItem cartItem : cartItems) {
+            OrderItem orderItem = new OrderItem(
+                    order,
+                    cartItem.getGame(),
+                    cartItem.getQuantity(),
+                    cartItem.getGame().getPrice()
+            );
+            orderItemRepository.save(orderItem);
+        }
+
+        cartItemRepository.deleteAll(cartItems);
+
+        return order;
+    }
 }
