@@ -50,7 +50,7 @@ function Home() {
   }, [search, genre, platform, minPrice, maxPrice]);
 
   return (
-    <div className="relative min-h-screen w-screen bg-black text-white overflow-hidden">
+    <div className="relative min-h-screen w-full bg-black text-white overflow-hidden">
       {/* Background gradient with animated shift */}
       <div className="absolute inset-0 -z-10 bg-gradient-to-tr from-purple-900 via-pink-900 to-pink-700 animate-bgShift"></div>
       
@@ -60,21 +60,21 @@ function Home() {
         className="pointer-events-none fixed inset-0 -z-10 scanlines"
       />
 
-      <main className="relative z-10 min-h-screen">
+  <main className="relative z-10 min-h-screen pt-20">
         <NavBar />
         <Hero />
 
         {/* -- Maximum width responsive container for main content -- */}
-        <div className="relative z-10 max-w-7xl mx-auto px-2 sm:px-6 pt-10 pb-12">
-          <div className="relative w-full mb-12 flex flex-col items-stretch">
-  <div className="w-full flex flex-col md:flex-row gap-4 items-center justify-between rounded-xl border border-pink-600 bg-[#161320]/90 shadow-lg backdrop-blur p-5 transition-all">
-    {/* Floating label */}
-    <div className="absolute -top-7 left-7 text-xs sm:text-base bg-[#26112e] px-5 py-1 rounded-full shadow font-semibold tracking-wide text-pink-400 border border-pink-700 select-none">
-      Find Your Next Game
-    </div>
-    {/* SearchBar */}
-    <div className="flex-1 min-w-0 w-full md:max-w-[60%] relative">
-      <div className="relative w-full">
+        <div className="relative z-10 max-w-7xl mx-auto px-2 sm:px-4 pt-6 pb-16">
+          <div className="relative w-full mb-8 flex flex-col items-stretch">
+            <div className="w-full flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between rounded-xl border border-pink-600 bg-[#161320]/90 shadow-lg backdrop-blur p-4 md:p-5 transition-all">
+              {/* Floating label */}
+              <div className="absolute -top-7 left-4 text-xs sm:text-base bg-[#26112e] px-4 py-1 rounded-full shadow font-semibold tracking-wide text-pink-400 border border-pink-700 select-none">
+                Find Your Next Game
+              </div>
+              {/* SearchBar */}
+              <div className="flex-1 min-w-0 w-full md:max-w-[60%] relative mb-3 md:mb-0">
+                <div className="relative w-full">
         <HiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-pink-400 text-xl pointer-events-none" />
         <input
           type="search"

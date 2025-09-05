@@ -330,10 +330,10 @@ const GameDetails = () => {
 
       <Navbar />
 
-      <main className="relative z-30 max-w-7xl mx-auto p-6 pt-24 flex flex-col lg:flex-row gap-12 flex-nowrap items-start">
+  <main className="relative z-30 max-w-7xl mx-auto p-2 sm:p-4 pt-32 lg:pt-40 flex flex-col lg:flex-row gap-8 lg:gap-12 flex-nowrap items-start">
         {/* Left: Trailer + Add Review + Reviews */}
-        <aside className="w-full lg:w-[520px] flex-shrink-0 mb-8 lg:mb-0 flex flex-col gap-8">
-          <TrailerGallery trailers={trailers} coverUrl={`http://localhost:8080${game.coverUrl}`} />
+  <aside className="w-full lg:w-[520px] flex-shrink-0 mb-6 lg:mb-0 flex flex-col gap-6 order-2 lg:order-none">
+          <TrailerGallery trailers={trailers} coverUrl={game.coverUrl} />
 
           {/* Add Review Form */}
           <section className="bg-black bg-opacity-70 backdrop-blur-md rounded-xl border border-pink-700 p-6 shadow-lg flex flex-col gap-4">
@@ -416,13 +416,14 @@ const GameDetails = () => {
           </section>
         </aside>
 
-        {/* Right: Game info/main content */}
-        <section className="flex-grow min-w-0 max-w-2xl bg-black bg-opacity-70 backdrop-blur-md rounded-xl border border-pink-700 p-6 shadow-lg flex flex-col gap-5 overflow-y-auto max-h-[90vh]">
+  {/* Right: Game info/main content */}
+  <section className="flex-grow min-w-0 w-full max-w-2xl bg-black bg-opacity-70 backdrop-blur-md rounded-xl border border-pink-700 p-4 sm:p-6 shadow-lg flex flex-col gap-4 sm:gap-5 overflow-y-auto max-h-[90vh] order-1 lg:order-none mb-4 lg:mb-0">
           <img
-            src={`http://localhost:8080${game.coverUrl}`}
+            src={game.coverUrl}
             alt={game.title}
             className="w-full rounded-lg max-h-48 object-cover select-none"
             draggable={false}
+            style={{ maxWidth: '100%' }}
           />
 
           <h1 className="text-4xl font-extrabold bg-gradient-to-r from-pink-400 via-pink-600 to-pink-700 bg-clip-text text-transparent drop-shadow-lg mb-1 flex flex-wrap items-center gap-x-3">

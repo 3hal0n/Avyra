@@ -133,7 +133,7 @@ const Chatbot = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 relative">
+  <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 relative px-2 sm:px-4 lg:px-16 py-4 gap-4 md:gap-10 pt-20">
       {/* Animated background elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse"></div>

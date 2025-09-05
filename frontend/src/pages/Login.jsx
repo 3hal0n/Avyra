@@ -55,9 +55,9 @@ const Login = () => {
       <NavBar />
 
       {/* Main content - split layout */}
-      <main className="flex flex-1 flex-col md:flex-row items-center justify-center px-4 sm:px-8 lg:px-28 py-10 gap-10">
-        {/* Left: Register Form */}
-        <section className="w-full max-w-md bg-[#0f0f16] bg-opacity-80 border border-pink-600 rounded-2xl p-10 shadow-neon flex flex-col mt-12 md:mt-24 ml-2 md:ml-10 md:self-start">
+  <main className="flex flex-1 flex-col md:flex-row items-center justify-center px-2 sm:px-4 lg:px-16 py-6 gap-6 md:gap-10 mt-20">
+        {/* Left: Login Form */}
+        <section className="w-full max-w-md bg-[#0f0f16] bg-opacity-80 border border-pink-600 rounded-2xl p-5 sm:p-8 shadow-neon flex flex-col mt-10 md:mt-20 mx-auto md:ml-10 md:self-start">
         
           <h2 className="text-center text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 mb-8 tracking-widest neon-text">
             LOGIN
@@ -200,13 +200,12 @@ const Login = () => {
 
         {/* Right: 3D character inside Canvas */}
         <section
-          className="hidden md:flex flex-1 items-center justify-center"
-          style={{ minHeight: 500 }}
+          className="block w-full h-64 md:h-[500px] bg-transparent flex items-center justify-center mt-6 md:mt-0"
         >
           <div className="w-full max-w-lg h-full flex items-center justify-center">
             <Canvas
               camera={{ position: [5, 0.5, 10], fov: 50 }} 
-              style={{ width: "100%", height: 500, background: "transparent" }}
+              style={{ width: "100%", height: '100%', background: "transparent" }}
             >
               {/* Lighting */}
               <ambientLight intensity={1} />
