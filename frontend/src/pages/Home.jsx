@@ -6,6 +6,7 @@ import GameList from "../components/GameList";
 import SearchBar from "../components/SearchBar";
 import Filters from "../components/Filters";
 import { fetchGames } from "../services/games";
+import { mockGames } from "../mockGames";
 import { HiSearch } from "react-icons/hi";
 
 function Home() {
@@ -28,7 +29,23 @@ function Home() {
     setLoading(true);
     fetchGames({ search, genre, platform, minPrice, maxPrice })
       .then(setGames)
-      .catch(() => setGames([]))
+      .catch(() => {
+        // Fallback to mock data if API fails
+        let filtered = mockGames;
+        if (search) {
+          const s = search.toLowerCase();
+          filtered = filtered.filter(g =>
+            g.title.toLowerCase().includes(s) ||
+            g.description.toLowerCase().includes(s) ||
+            (g.genres && g.genres.toLowerCase().includes(s))
+          );
+        }
+        if (genre) filtered = filtered.filter(g => g.genres && g.genres.includes(genre));
+        if (platform) filtered = filtered.filter(g => g.platforms && g.platforms.includes(platform));
+        if (minPrice) filtered = filtered.filter(g => g.price >= parseFloat(minPrice));
+        if (maxPrice) filtered = filtered.filter(g => g.price <= parseFloat(maxPrice));
+        setGames(filtered);
+      })
       .finally(() => setLoading(false));
   }, [search, genre, platform, minPrice, maxPrice]);
 

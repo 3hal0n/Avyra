@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
-
+import { mockGames } from '../mockGames';
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { useWishlist } from "../context/WishlistContext";
@@ -16,6 +16,8 @@ const StarRating = ({ value = 5 }) => (
     {"★".repeat(value).padEnd(5, "☆")}
   </span>
 );
+
+// Removed duplicate useEffect outside the component
 
 const formatDate = (isoString) =>
   isoString
@@ -182,7 +184,6 @@ const GameDetails = () => {
   useEffect(() => {
     const fetchAll = async () => {
       setLoading(true);
-
       try {
         const gameRes = await api.get(`/api/games/${id}`);
         setGame(gameRes.data);
@@ -193,9 +194,11 @@ const GameDetails = () => {
         const reviewsRes = await api.get(`/api/reviews`, { params: { gameId: id } });
         setReviews(reviewsRes.data || []);
       } catch {
-        setGame(null);
-        setTrailers([]);
-        setReviews([]);
+        // Fallback to mock data if API fails
+        const mock = mockGames.find(g => g.id === id);
+        setGame(mock || null);
+        setTrailers([]); // Optionally, add mock trailers here
+        setReviews([]); // Optionally, add mock reviews here
       } finally {
         setLoading(false);
       }
