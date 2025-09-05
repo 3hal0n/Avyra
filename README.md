@@ -12,7 +12,7 @@ Avyra is a Steam-inspired fullstack web application built with a **React** front
 
 ---
 ## Link
-https://avyra-2li63rqpv-shalon-fernandos-projects.vercel.app
+https://avyra-lac.vercel.app/
 
 ---
 
