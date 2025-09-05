@@ -108,11 +108,11 @@ MIT License. See LICENSE for details.
 
 ## How to Run
 
-###Frontend
-
+Frontend
 cd frontend
 npm install
 npm run dev
+
 ---
 ### Backend
 
