@@ -1,0 +1,8 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Backend Suite">
+  <test name="BackendTests">
+    <classes>
+      <class name="backend.BackendApplicationTests"/>
+    </classes>
+  </test>
+</suite>
