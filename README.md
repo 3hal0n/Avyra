@@ -128,3 +128,30 @@ Runs on http://localhost:8080
 
 
 
+
+
+---
+
+## Testing & 10-minute TestNG Demo
+
+We include a short TestNG demo used for a class presentation. See detailed instructions and speaking notes in `backend/TESTING.md`.
+
+Quick run (Unix/macOS):
+
+```sh
+cd backend
+chmod +x mvnw || true
+./mvnw -B test
+```
+
+Quick run (Windows PowerShell):
+
+```powershell
+cd backend
+.\mvnw -B test
+```
+
+After running, TestNG reports are in `backend/target/surefire-reports/` (open `index.html`).
+
+
+
