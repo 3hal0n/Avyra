@@ -3,6 +3,9 @@
   <test name="BackendTests">
     <classes>
       <class name="backend.BackendApplicationTests"/>
+      <class name="backend.service.impl.GameServiceTest"/>
+      <class name="backend.controller.ReviewControllerAssertionTest"/>
+      <class name="backend.controller.ChatbotControllerDataProviderTest"/>
     </classes>
   </test>
 </suite>
