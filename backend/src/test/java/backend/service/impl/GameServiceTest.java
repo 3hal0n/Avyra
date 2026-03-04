@@ -1,19 +1,19 @@
 package backend.service.impl;
 
-import backend.dto.GameDTO;
-import backend.model.Game;
-import backend.repository.GameRepository;
+import java.time.LocalDateTime;
+import java.util.List;
+
 import org.mockito.Mock;
+import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
-import static org.mockito.Mockito.when;
+import backend.dto.GameDTO;
+import backend.model.Game;
+import backend.repository.GameRepository;
 
 public class GameServiceTest {
 
