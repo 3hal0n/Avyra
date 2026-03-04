@@ -23,4 +23,7 @@ jobs:
         cache: maven
 
     - name: Run TestNG Tests via Maven
-      run: mvn clean test
+      working-directory: ./backend
+      run: |
+        chmod +x mvnw || true
+        ./mvnw -B test
