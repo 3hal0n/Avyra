@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
@@ -50,6 +51,7 @@ public class ReviewControllerAssertionTest {
 
         Assert.assertEquals(response.getStatusCode(), HttpStatus.OK);
         Assert.assertEquals(response.getBody(), "Review added successfully");
+        verify(reviewService).addReview(requestDTO);
     }
 
     @Test
@@ -65,5 +67,14 @@ public class ReviewControllerAssertionTest {
         softAssert.assertEquals(response.getBody().size(), 1, "Review list size mismatch");
         softAssert.assertEquals(response.getBody().get(0).getComment(), "Amazing", "Review text mismatch");
         softAssert.assertAll();
+    }
+
+    @Test
+    public void deleteReview_shouldReturnSuccess_hardAssertions() {
+        ResponseEntity<?> response = reviewController.deleteReview(10L);
+
+        Assert.assertEquals(response.getStatusCode(), HttpStatus.OK);
+        Assert.assertEquals(response.getBody(), "Review deleted successfully");
+        verify(reviewService).deleteReview(10L);
     }
 }
