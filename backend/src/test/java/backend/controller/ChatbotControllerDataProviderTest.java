@@ -1,5 +1,6 @@
 package backend.controller;
 
+import java.util.List;
 import java.util.Map;
 
 import org.mockito.InjectMocks;
@@ -56,5 +57,34 @@ public class ChatbotControllerDataProviderTest {
         Assert.assertEquals(response.getBody().get("success"), true);
         Assert.assertEquals(response.getBody().get("response"), stubbedReply);
         verify(chatbotService).generateResponse(prompt);
+    }
+
+    @Test
+    public void chat_shouldReturnBadRequest_whenServiceThrowsException() throws Exception {
+        String prompt = "cause failure";
+        when(chatbotService.generateResponse(prompt)).thenThrow(new RuntimeException("LLM unavailable"));
+
+        ResponseEntity<Map<String, Object>> response = chatbotController.chat(Map.of("message", prompt));
+
+        Assert.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assert.assertEquals(response.getBody().get("success"), false);
+        Assert.assertEquals(response.getBody().get("error"), "LLM unavailable");
+        verify(chatbotService).generateResponse(prompt);
+    }
+
+    @Test
+    public void getGames_shouldReturnGameList_whenServiceSucceeds() {
+        List<Map<String, Object>> games = List.of(
+                Map.of("id", 1, "name", "Spider-Man"),
+                Map.of("id", 2, "name", "Cyberpunk 2077")
+        );
+        when(chatbotService.getGameData()).thenReturn(games);
+
+        ResponseEntity<Map<String, Object>> response = chatbotController.getGames();
+
+        Assert.assertEquals(response.getStatusCode(), HttpStatus.OK);
+        Assert.assertEquals(response.getBody().get("success"), true);
+        Assert.assertEquals(response.getBody().get("games"), games);
+        verify(chatbotService).getGameData();
     }
 }
