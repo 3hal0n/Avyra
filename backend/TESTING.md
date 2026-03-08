@@ -48,6 +48,30 @@ backend/target/surefire-reports/
 
 Open `backend/target/surefire-reports/index.html` in a browser to view the HTML report.
 
+## Allure Reports (with TestNG)
+
+Allure integration is configured in `backend/pom.xml` using `allure-testng` and `allure-maven`.
+
+When you run tests, Allure raw results are generated at:
+
+```
+backend/target/allure-results/
+```
+
+Generate and open the Allure HTML report:
+
+```sh
+cd backend
+./mvnw -B test
+./mvnw -B allure:report
+```
+
+The generated HTML report is created at:
+
+```
+backend/target/site/allure-maven-plugin/index.html
+```
+
 ## pom.xml (TestNG setup reminder)
 
 Ensure these test dependencies/plugins are present (already in project):
